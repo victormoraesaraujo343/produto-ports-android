@@ -1,0 +1,32 @@
+{
+  "rodada": {
+    "numero": 1,
+    "aberta_em": "2026-10-27T02:25:55.017Z"
+  },
+  "geral": "",
+  "versoes": {
+    "pagina": {
+      "secoes": {
+        "3": {
+          "nome": "O que o port precisa (estado detalhado)",
+          "status": "aprovada",
+          "nota": "",
+          "variantes": {
+            "precisaMostrar": "sempre"
+          },
+          "aprovadas": {
+            "precisaMostrar": [
+              "sempre"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "alfinetes": [],
+  "rodadas": [],
+  "arquivo": {
+    "conversas": []
+  },
+  "atualizado": "2026-10-27T02:26:11.797Z"
+}

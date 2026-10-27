@@ -1,0 +1,32 @@
+{
+  "rodada": {
+    "numero": 1,
+    "aberta_em": "2026-10-27T02:24:59.405Z"
+  },
+  "geral": "",
+  "versoes": {
+    "pagina": {
+      "secoes": {
+        "3": {
+          "nome": "Grade de capas",
+          "status": "aprovada",
+          "nota": "",
+          "variantes": {
+            "capas": "vertical"
+          },
+          "aprovadas": {
+            "capas": [
+              "vertical"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "alfinetes": [],
+  "rodadas": [],
+  "arquivo": {
+    "conversas": []
+  },
+  "atualizado": "2026-10-27T02:25:32.863Z"
+}

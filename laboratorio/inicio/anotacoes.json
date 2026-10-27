@@ -1,0 +1,51 @@
+{
+  "rodada": {
+    "numero": 1,
+    "aberta_em": "2026-10-27T02:23:09.208Z"
+  },
+  "geral": "",
+  "versoes": {
+    "pagina": {
+      "secoes": {
+        "1": {
+          "nome": "Seções no topo (L1/R1)",
+          "status": "aprovada",
+          "nota": "",
+          "variantes": {}
+        },
+        "2": {
+          "nome": "Jogo em foco: arte, nome, estado e ação",
+          "status": "aprovada",
+          "nota": "",
+          "variantes": {
+            "destaque": "fundo"
+          },
+          "aprovadas": {
+            "destaque": [
+              "fundo"
+            ]
+          }
+        },
+        "3": {
+          "nome": "Fileira de recentes",
+          "status": "aprovada",
+          "nota": "",
+          "variantes": {
+            "recentesNome": "foco"
+          },
+          "aprovadas": {
+            "recentesNome": [
+              "foco"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "alfinetes": [],
+  "rodadas": [],
+  "arquivo": {
+    "conversas": []
+  },
+  "atualizado": "2026-10-27T02:24:39.600Z"
+}
