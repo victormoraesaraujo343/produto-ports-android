@@ -47,8 +47,8 @@ import app.ports.core.Textos
 
 /**
  * INÍCIO — deitado. O jogo em foco é o fundo da tela (aprovado na R1); a
- * fileira é atalho pros recentes; pra baixo abre a lista completa (Q-c). O nome
- * aparece só na capa em foco (aprovado na R1). A joga, Y abre os detalhes.
+ * fileira é atalho pros recentes; pra baixo abre a lista completa (Q-c). A
+ * joga, Y abre os detalhes.
  */
 @Composable
 fun Inicio(
@@ -80,26 +80,16 @@ fun Inicio(
         Column(Modifier.padding(start = 32.dp, top = 54.dp).width(460.dp)) {
             val pt = focado
             if (noTodos || pt == null) {
-                Texto("BIBLIOTECA", Tipo.sobre)
-                Texto("TODOS OS PORTS", Tipo.logo, Modifier.padding(top = 2.dp))
-                Texto("$total ports no catálogo", Tipo.corpo.copy(color = Color(0xFFE6E7EC), fontSize = 13.sp), Modifier.padding(top = 4.dp))
+                Texto("TODOS OS PORTS", Tipo.logo, Modifier.padding(top = 0.dp))
                 Row(Modifier.padding(top = 14.dp)) { BotaoHydra("Abrir a lista", true, Botao.A, aoClicar = aoTodos) }
             } else {
                 val t = Textos.de(pt.estado)
-                val sobre = when {
-                    pt == recentes.firstOrNull() -> "CONTINUAR JOGANDO"
-                    pt.port.jogadoHa != null && pt.port.jogadoHa != "nunca jogado" -> "JOGADO ${pt.port.jogadoHa!!.uppercase()}"
-                    else -> "RECENTES"
-                }
-                Texto(sobre, Tipo.sobre)
-                Texto(pt.port.logo, Tipo.logo, Modifier.padding(top = 2.dp))
-                Texto("${pt.port.nomePort} · ${pt.port.tipo}${pt.versaoInstalada?.let { " · v$it" } ?: ""}", Tipo.corpo.copy(color = Color(0xFFE6E7EC), fontSize = 13.sp), Modifier.padding(top = 4.dp))
-                Box(Modifier.padding(top = 9.dp)) { LinhaEstado(pt) }
-                if (pt.estado == Estado.FALTA_ARQUIVO) Texto("Serve: ${pt.port.arquivoQueServe}. A gente confere o arquivo pra você.", Tipo.dica, Modifier.padding(top = 4.dp))
+                Texto(pt.port.logo, Tipo.logo, Modifier.padding(top = 0.dp))
+                if (pt.estado != Estado.PRONTO) Box(Modifier.padding(top = 9.dp)) { LinhaEstado(pt) }
                 if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.padding(top = 8.dp).width(220.dp))
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     BotaoHydra(t.acao, true, Botao.A, aoClicar = { aoAcao(pt) })
-                    BotaoHydra("Detalhes", false, Botao.Y, aoClicar = { aoDetalhes(pt) })
+                    if (entrada == Entrada.TOQUE) BotaoHydra("⋯", false, null, aoClicar = { aoDetalhes(pt) })
                 }
             }
         }
@@ -131,11 +121,6 @@ fun Inicio(
                         .acionavel { aoAcao(pt) }
                 ) {
                     Arte(pt.port, Modifier.fillMaxSize(), tamanhoNome = 12.sp)
-                    if (temFoco || entrada == Entrada.TOQUE) {
-                        Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xD9000000)))).padding(start = 8.dp, end = 32.dp, top = 16.dp, bottom = 6.dp)) {
-                            Texto(pt.port.titulo, Tipo.botao.copy(fontSize = 12.sp, color = Color.White), linhas = 1)
-                        }
-                    }
                     Selo(pt, Modifier.align(Alignment.BottomEnd).padding(6.dp))
                     if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.align(Alignment.BottomStart).fillMaxWidth())
                 }
@@ -150,11 +135,7 @@ fun Inicio(
                         .acionavel { aoTodos() },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Texto("Todos os ports", Tipo.botao.copy(fontSize = 12.5.sp, color = Cor.texto))
-                        Texto("↓", Tipo.corpo)
-                        Texto("$total no catálogo", Tipo.dica.copy(fontSize = 11.sp))
-                    }
+                    Texto("Todos os ports", Tipo.botao.copy(fontSize = 12.5.sp, color = Cor.texto))
                 }
             }
         }
@@ -162,7 +143,7 @@ fun Inicio(
 
         val pt = focado
         Dicas(
-            if (noTodos || pt == null) listOf(Botao.A to "Abrir") else listOf(Botao.A to Textos.de(pt.estado).acao, Botao.Y to "Detalhes"),
+            if (noTodos || pt == null) emptyList() else listOf(Botao.Y to "Detalhes"),
             Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 10.dp),
         )
     }

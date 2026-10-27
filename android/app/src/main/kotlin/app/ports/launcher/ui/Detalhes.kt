@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,7 +40,7 @@ import app.ports.core.Tom
 /**
  * DETALHES — deitado. O estado que a capa resume vira a lista do que o port
  * precisa, sempre visível (aprovado na R1). A ação principal fica no mesmo
- * lugar e muda as palavras (P-26). O que não é do app tem fonte (P-29).
+ * lugar e muda as palavras (P-26).
  */
 @Composable
 fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit) {
@@ -54,22 +53,16 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit)
         Arte(p, Modifier.fillMaxSize().padding(start = 270.dp), comNome = false)
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.34f to Cor.fundo, 0.52f to Color(0xD1121212), 0.75f to Color(0x73121212), 1f to Color(0xB3121212))))
 
-        // caminho: onde estou e como volto (P-35)
-        Row(Modifier.fillMaxWidth().height(44.dp).padding(horizontal = 26.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(Modifier.clickableSemFoco(aoVoltar), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Glifo(Botao.B, claro = false)
-                if (entrada == Entrada.TOQUE) Texto("‹", Tipo.logo.copy(fontSize = 22.sp))
-            }
-            Texto("Ports", Tipo.dica)
-            Texto("›", Tipo.dica)
-            Texto(p.titulo, Tipo.botao.copy(fontSize = 13.sp, color = Cor.claro))
+        // ‹ só no toque; com controle, B volta (dica embaixo)
+        if (entrada == Entrada.TOQUE) Box(Modifier.padding(start = 20.dp, top = 8.dp).clickableSemFoco(aoVoltar)) {
+            Texto("‹", Tipo.logo.copy(fontSize = 28.sp))
         }
 
         Row(Modifier.fillMaxSize().padding(top = 50.dp)) {
             // coluna da ação
             Column(Modifier.padding(start = 32.dp).width(400.dp)) {
                 Texto(p.logo, Tipo.logo.copy(fontSize = 28.sp))
-                Texto("${p.nomePort} · ${p.tipo} · ${p.plataforma}", Tipo.corpo.copy(fontSize = 13.sp, color = Color(0xFFE6E7EC)), Modifier.padding(top = 4.dp))
+                Texto("${p.nomePort} · ${p.plataforma}", Tipo.corpo.copy(fontSize = 13.sp, color = Color(0xFFE6E7EC)), Modifier.padding(top = 4.dp))
                 Box(Modifier.padding(top = 8.dp)) { LinhaEstado(pt) }
                 val principal = remember { FocusRequester() }
                 Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -91,18 +84,14 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit)
             Column(Modifier.weight(1f).fillMaxHeight().padding(start = 40.dp, end = 30.dp, bottom = 40.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Bloco("SOBRE", entrada) { Texto(p.descricao, Tipo.corpo.copy(fontSize = 13.5.sp, lineHeight = 20.sp)) }
                 Bloco("FICHA", entrada) {
-                    Ficha("Tipo", if (p.tipo == "recompilado") "Recompilado: o código do jogo foi traduzido pra rodar nativo." else "Decompilado: o código do jogo foi refeito à mão a partir do original.")
+                    Ficha("Tipo", p.tipo.replaceFirstChar { it.uppercase() })
                     Ficha("Versão", pt.versaoInstalada ?: "não instalado")
                     Ficha("Tamanho", p.tamanho)
-                    Ficha("Jogo original", p.plataforma)
-                }
-                Bloco("DE ONDE VEM", entrada) {
-                    Texto("Feito por ${p.repo.substringBefore('/')}. O app baixa a versão oficial do projeto no GitHub.", Tipo.corpo.copy(fontSize = 13.5.sp, lineHeight = 20.sp))
-                    Texto("Informações do catálogo de ports (exemplo).", Tipo.dica.copy(fontSize = 12.5.sp), Modifier.padding(top = 6.dp))
+                    Ficha("Projeto", p.repo)
                 }
             }
         }
-        Dicas(listOf(Botao.A to acao, Botao.B to "Voltar"), Modifier.align(Alignment.BottomEnd).padding(end = 30.dp, bottom = 10.dp))
+        Dicas(listOf(Botao.B to "Voltar"),Modifier.align(Alignment.BottomEnd).padding(end = 30.dp, bottom = 10.dp))
     }
 }
 
@@ -134,7 +123,7 @@ private fun Precisa(pt: PortNaTela) {
                 }
                 Column {
                     Texto(titulo, Tipo.botao.copy(fontSize = 13.5.sp, color = Cor.claro))
-                    if (detalhe.isNotEmpty()) Texto(detalhe, Tipo.dica.copy(fontSize = 12.5.sp))
+                    if ((tom == Tom.AVISO || tom == Tom.RUIM) && detalhe.isNotEmpty()) Texto(detalhe, Tipo.dica.copy(fontSize = 12.5.sp))
                 }
             }
         }

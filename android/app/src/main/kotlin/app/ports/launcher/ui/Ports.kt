@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -82,8 +81,6 @@ fun Ports(
                     Texto("${todos.count(f.aceita)}", Tipo.dica.copy(fontSize = 12.sp, color = if (sel) Color(0xFF4A4B52) else Cor.texto2))
                 }
             }
-            Box(Modifier.weight(1f))
-            Texto("Ordem: A–Z", Tipo.dica)
         }
 
         // grade de capas verticais
@@ -125,14 +122,11 @@ fun Ports(
         ) {
             val pt = focado
             if (pt != null) {
-                Column {
-                    Texto(pt.port.titulo, Tipo.botao.copy(color = Cor.claro))
-                    Texto("${pt.port.nomePort} · ${pt.port.plataforma}", Tipo.dica.copy(fontSize = 12.sp))
-                }
-                LinhaEstado(pt)
+                Texto(pt.port.titulo, Tipo.botao.copy(color = Cor.claro))
+                if (pt.estado != Estado.PRONTO) LinhaEstado(pt, longo = false)
             }
             Box(Modifier.weight(1f))
-            Dicas(if (pt != null) listOf(Botao.A to Textos.de(pt.estado).acao, Botao.Y to "Detalhes") else listOf(Botao.A to "Escolher", Botao.B to "Voltar"))
+            Dicas(if (pt != null) listOf(Botao.A to Textos.de(pt.estado).acao, Botao.Y to "Detalhes") else emptyList())
         }
     }
 }

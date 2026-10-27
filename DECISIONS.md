@@ -54,6 +54,16 @@
 
 **Consequências:** a variação troca com Shift + ←/→, já que as setas são o direcional do app. A página do sistema do painel não veio junto, porque depende da identidade do portfólio. Detalhes em `laboratorio/refinamento/README.md`.
 
+## D-007 — Só o texto essencial
+
+**Status:** aceita · **Data:** 2026-10-27
+
+**Contexto:** no primeiro teste no Odin, o Victor achou o app "com texto de filler em extremo excesso".
+
+**Decisão:** cada informação aparece uma vez e só onde é usada. O estado só aparece quando pede atenção, já que "Pronto" fica implícito no botão "Jogar". Explicação só existe onde o jogador precisa agir (ex.: "Serve: …"). As dicas de botões não repetem o que um botão grande já mostra. Detalhes técnicos (port, tipo, versão, projeto) ficam só na ficha de Detalhes.
+
+**Consequências:** sai o nome sobre a capa em foco, que tinha sido aprovado na R1 (variação `recentesNome = foco`), porque repetia o título grande e o nome na arte. Se o Victor quiser de volta, é só reverter esse ponto. O lab ainda tem os textos antigos e vale como referência de layout, não de texto.
+
 ## Decisões da IA que o Victor precisa conferir
 
 - **Q-a:** "Ports" substitui Catálogo e Biblioteca, com filtros Instalados, Disponíveis e Atualizações.
