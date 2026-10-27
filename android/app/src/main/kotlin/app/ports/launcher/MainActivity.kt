@@ -115,12 +115,12 @@ class MainActivity : ComponentActivity() {
                                 if (pronto == null) TelaSemLista(Secao.INICIO, estado, { irSecao(it) }, { atualizarLista() })
                                 else Inicio(
                                     itens = fileira, focoInicial = focadoId,
-                                    aoFocar = { focadoId = it?.port?.id }, aoAcao = { acao(it) }, aoDetalhes = { detalhes(it.port.id) },
+                                    aoFocar = { focadoId = it?.port?.id }, aoAcao = { if (Textos.naoInstalado(it.estado)) detalhes(it.port.id) else acao(it) }, aoDetalhes = { detalhes(it.port.id) },
                                     aoTodos = { irSecao(Secao.PORTS) }, aoSecao = { irSecao(it) },
                                 )
                             Secao.PORTS ->
                                 if (pronto == null) TelaSemLista(Secao.PORTS, estado, { irSecao(it) }, { atualizarLista() })
-                                else Ports(visiveis, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { acao(it) }, aoSecao = { irSecao(it) })
+                                else Ports(visiveis, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { if (Textos.naoInstalado(it.estado)) detalhes(it.port.id) else acao(it) }, aoSecao = { irSecao(it) })
                             Secao.AJUSTES -> Ajustes(
                                 atualizadoEm = pronto?.atualizadoEm,
                                 aoSecao = { irSecao(it) },

@@ -92,7 +92,7 @@ fun Inicio(
                 if (pt.estado != Estado.PRONTO) Box(Modifier.padding(top = 9.dp)) { LinhaEstado(pt) }
                 if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.padding(top = 8.dp).width(220.dp))
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BotaoHydra(t.acao, true, Botao.A, aoClicar = { aoAcao(pt) })
+                    BotaoHydra(Textos.acaoNaLista(pt.estado), true, Botao.A, aoClicar = { aoAcao(pt) })
                     if (entrada == Entrada.TOQUE) BotaoHydra("⋯", false, null, aoClicar = { aoDetalhes(pt) })
                 }
             }
@@ -150,7 +150,7 @@ fun Inicio(
         LaunchedEffect(Unit) { primeiro.focarQuandoPuder() }
 
         Dicas(
-            if (noTodos || focado == null) emptyList() else listOf(Botao.Y to "Detalhes"),
+            if (noTodos || focado == null || Textos.naoInstalado(focado!!.estado)) emptyList() else listOf(Botao.Y to "Detalhes"),
             Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 10.dp),
         )
     }

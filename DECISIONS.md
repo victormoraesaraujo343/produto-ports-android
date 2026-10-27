@@ -64,6 +64,14 @@
 
 **Consequências:** sai o nome sobre a capa em foco, que tinha sido aprovado na R1 (variação `recentesNome = foco`), porque repetia o título grande e o nome na arte. Se o Victor quiser de volta, é só reverter esse ponto. O lab ainda tem os textos antigos e vale como referência de layout, não de texto.
 
+## D-008 — Ver os Detalhes antes de instalar
+
+**Status:** aceita (pedido do Victor) · **Data:** 2026-10-27
+
+**Decisão:** numa capa de port ainda não instalado, A abre os Detalhes, e o "Instalar" fica só lá dentro. Pra port instalado, A continua jogando direto.
+
+**Por quê:** o Victor quer ver do que se trata (descrição, versão, tamanho, projeto) antes de baixar.
+
 ## Decisões da IA que o Victor precisa conferir
 
 - **Q-a:** "Ports" substitui Catálogo e Biblioteca, com filtros Instalados, Disponíveis e Atualizações.

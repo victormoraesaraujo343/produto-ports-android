@@ -43,6 +43,12 @@ data class Texto(val simbolo: String, val curto: String, val longo: String, val 
 
 /** As palavras de cada estado — as mesmas do lab (laboratorio/comum/dados.js). */
 object Textos {
+    /** Port ainda não instalado: na lista, A leva aos Detalhes; instalar é lá dentro. */
+    fun naoInstalado(e: Estado) = e == Estado.DISPONIVEL || e == Estado.NAO_RODA
+
+    /** O que A faz numa capa (Início e Ports). */
+    fun acaoNaLista(e: Estado): String = if (naoInstalado(e)) "Detalhes" else de(e).acao
+
     fun de(e: Estado): Texto = when (e) {
         Estado.PRONTO -> Texto("✓", "Pronto", "Pronto pra jogar", "Jogar", Tom.OK)
         Estado.BAIXANDO -> Texto("↓", "Baixando", "Baixando a atualização", "Jogar mesmo assim", Tom.DOWNLOAD)

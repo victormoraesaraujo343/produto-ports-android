@@ -36,4 +36,10 @@ class ProntidaoTest {
             }
         }
     }
+
+    @Test fun `na lista, port nao instalado leva aos detalhes`() {
+        assertEquals("Detalhes", Textos.acaoNaLista(Estado.DISPONIVEL))
+        assertEquals("Detalhes", Textos.acaoNaLista(Estado.NAO_RODA))
+        assertEquals("Jogar", Textos.acaoNaLista(Estado.PRONTO))
+    }
 }

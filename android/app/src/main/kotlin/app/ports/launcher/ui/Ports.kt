@@ -134,7 +134,7 @@ fun Ports(
                 if (pt.estado != Estado.PRONTO) LinhaEstado(pt, longo = false)
             }
             Box(Modifier.weight(1f))
-            Dicas(if (pt != null) listOf(Botao.A to Textos.de(pt.estado).acao, Botao.Y to "Detalhes") else emptyList())
+            Dicas(if (pt == null) emptyList() else if (Textos.naoInstalado(pt.estado)) listOf(Botao.A to "Detalhes") else listOf(Botao.A to Textos.de(pt.estado).acao, Botao.Y to "Detalhes"))
         }
     }
 }

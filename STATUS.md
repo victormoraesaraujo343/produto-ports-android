@@ -4,7 +4,7 @@
 
 ## Onde estamos
 
-O app funciona de ponta a ponta no AYN Odin 2 (`TESTADO NO APARELHO`, 2026-10-27). Ele lê a lista online do `ports-catalogue` (31 ports com APK, 28 sem os de VR) e instala o port oficial (Gen2Recomped) baixado do GitHub. O Android pediu a permissão e a confirmação, e o Victor aceitou. O **Jogar** abriu o port, que importou o dump do Victor (Pokémon Silver USA/Europe, SHA-1 conferido) e rodou o jogo. As capturas estão em `docs/aparelho/`. Ainda não foi testado: as capas reais, que dependem da chave do SteamGridDB do Victor em Ajustes.
+O app funciona de ponta a ponta no AYN Odin 2 (`TESTADO NO APARELHO`, 2026-10-27). Ele lê a lista online do `ports-catalogue` (31 ports com APK, 28 sem os de VR) e instala o port oficial (Gen2Recomped) baixado do GitHub. O Android pediu a permissão e a confirmação, e o Victor aceitou. O **Jogar** abriu o port, que importou o dump do Victor (Pokémon Silver USA/Europe, SHA-1 conferido) e rodou o jogo. As capturas estão em `docs/aparelho/`. Capas reais do SteamGridDB conferidas no Odin, com a chave que o Victor colou em Ajustes.
 
 ## O que existe
 
