@@ -16,3 +16,13 @@ npm run lab   # http://localhost:5192/laboratorio/index.html
 ```
 
 Deitado é a vista padrão (setas, Enter = A, Esc = B, Y, Q/E = L1/R1, O = Opções; controle de verdade também funciona). Pra ver em pé, aperte **V**. O painel de Refinamento (o do portfólio) abre e fecha com **R**; a variação troca com **Shift + ←/→**.
+
+## App
+
+```sh
+cd android
+./gradlew :core:test :app:assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+Esqueleto (issue #1): Início, Ports e Detalhes deitados, com catálogo de exemplo.

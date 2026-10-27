@@ -3,3 +3,8 @@ laboratorio/_versoes/
 .superpowers/
 .impeccable/
 dist/
+android/.gradle/
+android/build/
+android/*/build/
+android/local.properties
+android/.kotlin/
