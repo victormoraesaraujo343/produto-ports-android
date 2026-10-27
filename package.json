@@ -1,0 +1,13 @@
+{
+  "name": "produto-ports-android",
+  "private": true,
+  "type": "module",
+  "description": "Launcher Android de ports recompilados/decompilados com a cara do Hydra. Laboratório de telas.",
+  "scripts": {
+    "lab": "vite --config laboratorio/vite.config.mjs --port 5192 --open /laboratorio/index.html"
+  },
+  "devDependencies": {
+    "vite": "6.4.3"
+  },
+  "engines": { "node": ">=20" }
+}

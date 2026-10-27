@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Launcher de ports · A + C com a pesquisa do Roseta</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121212; --dark:#0d0d0d; --muted:#f0f1f7; --body:#d0d1d7; --dim:#a4a5ad;
+    --border:rgba(255,255,255,.08); --teal:#16b195; --warn:#ffc107; --ok:#5fe39a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#070707;color:var(--body);font-family:"Noto Sans",sans-serif;font-size:14px;padding:32px 24px 72px}
+  h1{color:var(--muted);font-size:22px;margin:0 0 6px}
+  .sub{color:var(--dim);margin:0 0 30px;max-width:900px;line-height:1.55}
+  .stage{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start;margin-bottom:44px}
+  .cap{max-width:330px}
+  .cap h3{color:var(--muted);font-size:15px;margin:14px 0 8px;display:flex;gap:10px;align-items:center}
+  .num{width:24px;height:24px;border-radius:50%;background:var(--muted);color:#121212;font-weight:700;display:grid;place-items:center;font-size:12px;flex:none}
+  .cap ol{margin:0;padding-left:18px;color:var(--dim);font-size:12.5px;line-height:1.55}
+  .cap ol li{margin-bottom:6px}
+  .cap ol b{color:var(--body);font-weight:600}
+  .src{color:#7fd8c6;font-size:11px}
+
+  /* ====== aparelho ====== */
+  .phone{width:300px;height:630px;border-radius:34px;border:8px solid #1e1e1e;background:var(--bg);overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .land{width:700px;height:316px;border-radius:30px;border:8px solid #1e1e1e;background:var(--bg);overflow:hidden;position:relative}
+
+  /* ====== retrato ====== */
+  .status{height:22px;flex:none;font-size:10px;color:var(--dim);display:flex;justify-content:space-between;padding:5px 18px 0}
+  .p-head{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px}
+  .p-head h2{margin:0;color:var(--muted);font-size:20px}
+  .ibtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);display:grid;place-items:center;color:var(--muted)}
+  .p-hero{margin:8px 14px 0;height:210px;border-radius:8px;position:relative;overflow:hidden;box-shadow:0 0 15px #000}
+  .p-hero .art,.l-bg{position:absolute;inset:0}
+  .p-hero .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.92) 18%,rgba(0,0,0,.2) 70%,transparent)}
+  .p-hero .info{position:absolute;left:14px;right:14px;bottom:14px}
+  .eyebrow{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:#e6e7ec}
+  .logo{font-weight:700;color:#fff;letter-spacing:.4px;text-shadow:0 2px 10px #000;line-height:1.05}
+  .meta{font-size:11px;color:#e6e7ec;margin-top:4px}
+  .ready{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-weight:600;margin-top:8px}
+  .ready.ok{color:var(--ok)} .ready.warn{color:var(--warn)} .ready.dl{color:#7fd8c6}
+  .actions{display:flex;gap:8px;margin-top:10px}
+  .btn{height:40px;border-radius:8px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+  .btn.primary{background:var(--muted);color:#121212}
+  .btn.outline{border:1px solid rgba(255,255,255,.22);color:var(--muted);background:rgba(0,0,0,.35)}
+  .btn.icon{width:40px;padding:0;justify-content:center}
+  .chips{display:flex;gap:6px;padding:14px 14px 6px}
+  .chip{padding:6px 11px;border-radius:8px;border:1px solid var(--border);font-size:11.5px;color:var(--body);white-space:nowrap}
+  .chip.on{background:var(--muted);color:#121212;font-weight:600}
+  .list{padding:2px 14px;display:flex;flex-direction:column;gap:8px}
+  .item{display:flex;gap:10px;align-items:center;height:56px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);padding:0 10px 0 0;overflow:hidden}
+  .item .cv{width:56px;height:56px;flex:none}
+  .item .tx{flex:1;min-width:0}
+  .item .tx b{display:block;color:var(--muted);font-size:12.5px;font-weight:600}
+  .item .tx span{font-size:11px}
+  .item .tx span.ok{color:var(--ok)} .item .tx span.warn{color:var(--warn)} .item .tx span.dl{color:#7fd8c6}
+  .bar{height:3px;border-radius:2px;background:#2a2a2a;margin-top:4px;overflow:hidden}.bar i{display:block;height:100%;width:62%;background:var(--teal)}
+  .noart{background:#1b1b1b;display:grid;place-items:center;color:var(--dim);font-weight:700;font-size:13px;letter-spacing:.5px}
+  .tabbar{margin-top:auto;height:62px;flex:none;border-top:1px solid var(--border);background:var(--dark);display:flex;justify-content:space-around;align-items:center;padding-bottom:6px}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--dim);width:70px}
+  .tab b{font-size:17px;font-weight:400;line-height:1}
+  .tab.on{color:var(--muted)} .tab.on b{color:var(--teal)}
+
+  /* ====== deitado ====== */
+  .l-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.96) 30%,rgba(10,10,10,.55) 62%,rgba(10,10,10,.25)),linear-gradient(0deg,rgba(10,10,10,.95) 8%,transparent 48%)}
+  .l-top{position:absolute;top:0;left:0;right:0;height:34px;display:flex;align-items:center;padding:0 22px;gap:16px;z-index:3}
+  .sh{font-size:9.5px;font-weight:700;color:#121212;background:var(--dim);border-radius:4px;padding:1px 5px}
+  .ltab{font-size:12.5px;color:var(--dim);font-weight:500;padding:4px 0;border-bottom:2px solid transparent}
+  .ltab.on{color:var(--muted);border-color:var(--muted)}
+  .l-top .clock{margin-left:auto;font-size:11px;color:var(--dim)}
+  .l-info{position:absolute;left:24px;top:40px;width:360px;z-index:3}
+  .l-info .logo{font-size:26px}
+  .l-info .ready{margin-top:5px}
+  .l-info .actions{margin-top:8px}
+  .l-info .btn{height:36px;font-size:12.5px;padding:0 14px}
+  .glyph{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#121212;color:var(--muted);font-size:10px;font-weight:700}
+  .btn.outline .glyph{background:var(--muted);color:#121212}
+  .l-row{position:absolute;left:24px;right:0;bottom:30px;display:flex;gap:10px;align-items:flex-end;z-index:3}
+  .l-row .lbl{position:absolute;top:-20px;left:0;font-size:11px;color:var(--dim);font-weight:600}
+  .tile{width:78px;height:50px;border-radius:6px;position:relative;overflow:hidden;flex:none;box-shadow:0 0 10px #000}
+  .tile.focus{width:98px;height:62px;outline:3px solid var(--muted);outline-offset:3px}
+  .tile .st{position:absolute;right:4px;bottom:4px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:700;background:rgba(0,0,0,.75)}
+  .tile .st.ok{color:var(--ok)} .tile .st.warn{color:var(--warn)} .tile .st.dl{color:#7fd8c6}
+  .tile .pb{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(0,0,0,.6)}.tile .pb i{display:block;height:100%;width:62%;background:var(--teal)}
+  .tile.more{background:transparent;border:1px dashed rgba(255,255,255,.25);box-shadow:none;display:grid;place-items:center;color:var(--dim);font-size:10.5px;text-align:center;line-height:1.3}
+  .l-hint{position:absolute;right:20px;bottom:9px;display:flex;gap:14px;font-size:10.5px;color:var(--dim);z-index:3;align-items:center}
+  .l-hint .glyph{background:#2a2a2a;margin-right:4px}
+  .l-down{position:absolute;left:24px;bottom:9px;font-size:10.5px;color:var(--dim);z-index:3}
+
+  /* painel de opções */
+  .sheet-scrim{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:5}
+  .sheet{position:absolute;top:0;right:0;bottom:0;width:250px;background:#181818;border-left:1px solid var(--border);z-index:6;padding:16px 0}
+  .sheet .from{font-size:10px;color:var(--dim);padding:0 18px;text-transform:uppercase;letter-spacing:.6px}
+  .sheet h4{margin:4px 18px 12px;color:var(--muted);font-size:14px}
+  .opt{padding:9px 18px;font-size:12.5px;color:var(--body);display:flex;justify-content:space-between}
+  .opt.f{background:rgba(255,255,255,.08);color:var(--muted);box-shadow:inset 3px 0 0 var(--muted)}
+  .opt small{color:var(--dim);font-size:10.5px}
+  .sheet .foot{position:absolute;bottom:10px;left:18px;font-size:10.5px;color:var(--dim)}
+
+  .ann{position:absolute;z-index:9;width:20px;height:20px;border-radius:50%;background:var(--teal);color:#06231d;font-weight:700;font-size:11px;display:grid;place-items:center;box-shadow:0 0 0 3px rgba(22,177,149,.25)}
+  .land,.phone{flex:none}
+  @media (max-width:780px){.land{zoom:.62}}
+</style>
+</head>
+<body>
+<h1>A + C: um app só, que muda de jeito conforme você segura o celular</h1>
+<p class="sub">Em pé, com o dedo, ele funciona como a opção A. Deitado, com controle, funciona como a C, só que reorganizada com o que a pesquisa do Roseta mostrou. As duas usam as mesmas três seções (Início, Ports e Ajustes), então trocar de posição não muda onde as coisas estão. Os números verdes nas telas correspondem às notas ao lado.</p>
+
+<!-- ================= DEITADO: pronto ================= -->
+<div class="stage">
+  <div class="land">
+    <div class="l-bg" style="background:radial-gradient(circle at 78% 35%,#e0452f,#5a1a12 45%,#1a0a08)"></div>
+    <div class="l-top">
+      <span class="sh">L1</span>
+      <span class="ltab on">Início</span><span class="ltab">Ports</span><span class="ltab">Ajustes</span>
+      <span class="sh">R1</span>
+      <span class="clock">9:41 · ▮▮▮ 87%</span>
+    </div>
+    <span class="ann" style="left:2px;top:7px">1</span>
+
+    <div class="l-info">
+      <div class="eyebrow">Continuar jogando</div>
+      <div class="logo">SUPER MARIO 64</div>
+      <div class="meta">sm64coopdx · decompilado · v1.3.2</div>
+      <div class="ready ok">✓ Pronto pra jogar</div>
+      <div class="actions">
+        <span class="btn primary"><span class="glyph">A</span>Jogar</span>
+        <span class="btn outline"><span class="glyph">Y</span>Detalhes</span>
+      </div>
+    </div>
+    <span class="ann" style="left:4px;top:108px">2</span>
+    <span class="ann" style="left:4px;top:136px">3</span>
+
+    <div class="l-row">
+      
+      <div class="tile focus" style="background:linear-gradient(135deg,#e0452f,#3a1410)"><span class="st ok">✓</span></div>
+      <div class="tile" style="background:linear-gradient(135deg,#1f6fe0,#0b1b3d)"><span class="st dl">↓</span><span class="pb"><i></i></span></div>
+      <div class="tile" style="background:linear-gradient(135deg,#2f9e55,#0c2615)"><span class="st warn">!</span></div>
+      <div class="tile" style="background:linear-gradient(135deg,#8a4bd6,#2b1452)"><span class="st ok">✓</span></div>
+      <div class="tile noart">PD</div>
+      <div class="tile more">Todos os<br>ports ↓</div>
+    </div>
+    <span class="ann" style="left:560px;top:206px">4</span>
+
+    <div class="l-down">↓ Todos os ports</div>
+    <div class="l-hint" style="right:34px"><span><span class="glyph">A</span>Jogar</span><span><span class="glyph">Y</span>Detalhes</span><span><span class="glyph">☰</span>Opções</span><span><span class="glyph">B</span>Voltar</span></div>
+    <span class="ann" style="right:6px;bottom:6px">5</span>
+  </div>
+
+  <div class="cap">
+    <h3><span class="num">C</span>Deitado, com controle</h3>
+    <ol>
+      <li><b>A barra lateral sai e as seções vão pro topo, trocadas com L1/R1.</b> No celular deitado, a lateral comia um quarto da largura. Agora o jogo ocupa a tela inteira. <span class="src">Roseta: L1/R1 trocam de seção · barra fixa precisa merecer o espaço (P-10)</span></li>
+      <li><b>A arte do jogo em foco vira o fundo</b>, e as informações dele ficam do lado. O jogo selecionado é o elemento mais forte da tela. <span class="src">P-06 · direção visual</span></li>
+      <li><b>O Jogar fica direto no jogo em foco</b>, sem passar por uma página de detalhes antes. Detalhes ficam um botão ao lado, no Y. <span class="src">Síntese §3: ação principal no ponto de seleção</span></li>
+      <li><b>Cada capa mostra seu estado</b>: ✓ pronto, ↓ baixando (com a barra na própria capa) e ! falta algo. Por isso a aba Downloads deixou de existir. A fileira mostra só os recentes, e o resto fica na biblioteca, que abre pra baixo. Port sem arte também aparece, com as iniciais. <span class="src">§5 readiness · §1 home é atalho · P-08</span></li>
+      <li><b>Os botões que aparecem na tela são os do controle que você está usando.</b> Num controle de PlayStation, mostram △ ✕. No toque, essa barra some. <span class="src">P-23 · §7</span></li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= DEITADO: falta ROM + opções ================= -->
+<div class="stage">
+  <div class="land">
+    <div class="l-bg" style="background:radial-gradient(circle at 78% 35%,#3fae68,#123a22 45%,#08140c)"></div>
+    <div class="l-top">
+      <span class="sh">L1</span>
+      <span class="ltab on">Início</span><span class="ltab">Ports</span><span class="ltab">Ajustes</span>
+      <span class="sh">R1</span>
+    </div>
+    <div class="l-info">
+      <div class="eyebrow">Recentes</div>
+      <div class="logo">OCARINA OF TIME</div>
+      <div class="meta">Ship of Harkinian · decompilado · v9.0.2</div>
+      <div class="ready warn">! Falta o arquivo do jogo</div>
+      <div class="meta" style="color:var(--dim);margin-top:2px">Serve a versão americana 1.0 ou 1.2. A gente confere o arquivo pra você.</div>
+      <div class="actions">
+        <span class="btn primary"><span class="glyph">A</span>Escolher arquivo</span>
+      </div>
+    </div>
+    <span class="ann" style="left:4px;top:104px">6</span>
+
+    <div class="l-row">
+      
+      <div class="tile" style="background:linear-gradient(135deg,#e0452f,#3a1410)"><span class="st ok">✓</span></div>
+      <div class="tile" style="background:linear-gradient(135deg,#1f6fe0,#0b1b3d)"><span class="st dl">↓</span><span class="pb"><i></i></span></div>
+      <div class="tile focus" style="background:linear-gradient(135deg,#2f9e55,#0c2615)"><span class="st warn">!</span></div>
+    </div>
+
+    <div class="sheet-scrim"></div>
+    <div class="sheet">
+      <div class="from">Opções · ☰</div>
+      <h4>Ocarina of Time</h4>
+      <div class="opt f">Escolher arquivo do jogo</div>
+      <div class="opt">Detalhes do port</div>
+      <div class="opt">Página do projeto <small>GitHub ↗</small></div>
+      <div class="opt">Ajustes do port <small>abre no app ↗</small></div>
+      <div class="opt">Desinstalar</div>
+      <div class="foot"><span class="glyph" style="background:#2a2a2a">B</span> Fechar</div>
+    </div>
+    <span class="ann" style="right:236px;top:14px">7</span>
+  </div>
+
+  <div class="cap">
+    <h3><span class="num">C</span>Quando falta alguma coisa</h3>
+    <ol start="6">
+      <li><b>O botão principal fica no mesmo lugar e muda o texto</b>, de "Jogar" pra "Escolher arquivo". O aviso diz o que falta em palavras simples, sem falar em ROM, hash ou OTR. <span class="src">P-26 · Síntese §5 e §13</span></li>
+      <li><b>As opções abrem sempre no mesmo botão, o ☰, e de qualquer tela.</b> Elas abrem por cima do que você estava vendo, e o B fecha. O que sai do launcher leva a marca ↗. <span class="src">§3 rota única pra ações secundárias · P-36 · P-40</span></li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= EM PÉ ================= -->
+<div class="stage">
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ 87%</span></div>
+    <div class="p-head"><h2>Início</h2><div class="ibtn">⌕</div></div>
+    <div class="p-hero">
+      <div class="art" style="background:radial-gradient(circle at 70% 25%,#e0452f,#5a1a12 50%,#1a0a08)"></div><div class="shade"></div>
+      <div class="info">
+        <div class="eyebrow">Continuar jogando</div>
+        <div class="logo" style="font-size:24px">SUPER MARIO 64</div>
+        <div class="ready ok">✓ Pronto pra jogar</div>
+        <div class="actions">
+          <span class="btn primary" style="flex:1;justify-content:center">▶ Jogar</span>
+          <span class="btn outline icon">⋯</span>
+        </div>
+      </div>
+    </div>
+    <span class="ann" style="right:14px;top:250px">8</span>
+    <div class="chips"><span class="chip on">Recentes</span><span class="chip">Instalados</span><span class="chip">Disponíveis</span></div>
+    <div class="list">
+      <div class="item"><div class="cv" style="background:linear-gradient(135deg,#1f6fe0,#0b1b3d)"></div><div class="tx"><b>Sonic Mania</b><span class="dl">Baixando atualização · 62%</span><div class="bar"><i></i></div></div></div>
+      <div class="item"><div class="cv" style="background:linear-gradient(135deg,#2f9e55,#0c2615)"></div><div class="tx"><b>Ocarina of Time</b><span class="warn">! Falta o arquivo do jogo</span></div><span style="color:var(--dim)">⋯</span></div>
+      <div class="item"><div class="cv" style="background:linear-gradient(135deg,#8a4bd6,#2b1452)"></div><div class="tx"><b>Majora's Mask</b><span class="ok">✓ Pronto</span></div><span style="color:var(--dim)">⋯</span></div>
+      <div class="item"><div class="cv noart">PD</div><div class="tx"><b>Perfect Dark</b><span class="ok">✓ Pronto</span></div><span style="color:var(--dim)">⋯</span></div>
+    </div>
+    <span class="ann" style="left:8px;top:332px">9</span>
+    <div class="tabbar">
+      <div class="tab on"><b>⌂</b>Início</div>
+      <div class="tab"><b>▦</b>Ports</div>
+      <div class="tab"><b>⚙</b>Ajustes</div>
+    </div>
+  </div>
+
+  <div class="cap">
+    <h3><span class="num">A</span>Em pé, com o dedo</h3>
+    <ol start="8">
+      <li><b>Mesmo visual do Hydra e as mesmas três seções da versão deitada</b>, só que embaixo, no alcance do polegar. O ⋯ abre o mesmo menu de Opções do ☰. Segurar o dedo na capa também abre, mas é só um atalho: nada fica disponível somente por toque longo. <span class="src">P-22 · P-24 · regra "nada só por toque longo"</span></li>
+      <li><b>Uma lista com o estado escrito por extenso</b>, sem depender só da cor. O download aparece no próprio jogo. Os filtros se baseiam no que o app já sabe (instalado, disponível), então você não precisa organizar nada na mão. <span class="src">P-42 · Síntese §2</span></li>
+    </ol>
+    <p style="color:var(--dim);font-size:12px;line-height:1.5;margin-top:14px"><b style="color:var(--body)">Decisões minhas pra você conferir:</b> mostrar "Ports" em vez de separar Catálogo e Biblioteca; tirar a aba Downloads; e, deitado, o direcional pra baixo abrir a biblioteca, com os detalhes no Y.</p>
+  </div>
+</div>
+</body>
+</html>
