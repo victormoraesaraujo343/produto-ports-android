@@ -1,0 +1,19 @@
+/* INSTALAR — deitado */
+.instalar .fluxo-arte:not(.arte) { background: radial-gradient(circle at 70% 30%, #262626, #141414 60%); }
+.instalar .explica { color: var(--texto-2); font-size: 13px; }
+.instalar .novidades { margin: 6px 0 4px; padding: 10px 12px; border-radius: var(--raio); background: rgba(13,13,13,.7); border: 1px solid var(--borda); }
+.instalar .novidades .rotulo { font-size: 11.5px; letter-spacing: .7px; text-transform: uppercase; color: var(--texto-2); margin-bottom: 4px; }
+.instalar .novidades p { margin: 0; font-size: 13px; }
+.spinner.mini { width: 12px; height: 12px; border-width: 2px; }
+
+/* diálogo do Android (simulado): visual do sistema, não do app */
+.sistema-fundo { position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.6); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.sistema-fundo.aberta { display: flex; }
+.sistema { width: 340px; background: #2b2b31; color: #e6e6ec; border-radius: 26px; padding: 22px 24px 14px; font-family: Roboto, "Noto Sans", sans-serif; text-align: center; }
+.sis-ico { width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 10px; background: #44444e; display: grid; place-items: center; font-weight: 700; font-size: 18px; }
+.sistema b { font-size: 17px; font-weight: 500; }
+.sistema p { margin: 8px 0 16px; font-size: 14px; color: #c7c7d0; }
+.sis-acoes { display: flex; justify-content: flex-end; gap: 4px; }
+.sis-acoes button { padding: 10px 14px; border-radius: 20px; color: #a8c7fa; font-weight: 500; font-size: 14px; }
+.sis-acoes button.focado { background: rgba(168,199,250,.14); outline-color: #a8c7fa !important; }
+.sis-nota { font-size: 12px; color: var(--texto-2); margin: 0; }

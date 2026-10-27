@@ -195,3 +195,56 @@ html[data-entrada="toque"] .lateral .fechar-toque { display: block; }
   font-size: var(--logo-tam, 13px);
 }
 .fundo.arte[data-logo]::after, .hero-arte.arte[data-logo]::after { content: none; }
+
+/* ------------------------------------------------------------ caminho (telas de dentro) */
+.caminho {
+  position: absolute; z-index: 6; top: 0; left: 0; right: 0; height: 44px;
+  display: flex; align-items: center; gap: 10px; padding: 0 26px; font-size: 13px; color: var(--texto-2);
+}
+.caminho .voltar { display: inline-flex; align-items: center; gap: 6px; }
+.caminho .voltar .g { background: #2d2d2d; color: var(--claro); }
+.caminho .aqui { color: var(--claro); font-weight: 600; }
+.caminho .sep { opacity: .6; }
+.caminho .relogio { margin-left: auto; font-size: 12px; display: flex; gap: 10px; }
+.so-toque-inline { display: none; font-size: 22px; line-height: 1; color: var(--claro); padding: 0 6px; }
+html[data-entrada="toque"] .so-toque-inline { display: inline; }
+
+/* ------------------------------------------------------------ diálogo (confirmar) */
+.dialogo-fundo { position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.6); display: none; place-items: center; }
+.dialogo-fundo.aberta { display: grid; }
+.dialogo { width: 420px; background: #1c1c1c; border: 1px solid var(--borda); border-radius: 12px; padding: 22px 24px 18px; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+.dialogo h3 { margin: 0 0 8px; color: var(--claro); font-size: 17px; }
+.dialogo p { margin: 0 0 18px; font-size: 14px; line-height: 1.5; color: var(--texto); }
+.dialogo .acoes { display: flex; gap: 8px; justify-content: flex-end; }
+.btn.perigo { background: #4a1a20; color: #ffd6db; border-color: #7a2a33; }
+
+/* ------------------------------------------------------------ lista de itens (checklist, ajustes) */
+.lista-itens { display: flex; flex-direction: column; gap: 2px; }
+.item-linha { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; font-size: 13.5px; }
+.item-linha .s { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.06); }
+.item-linha.ok .s { color: var(--ok); } .item-linha.warn .s { color: var(--aviso); } .item-linha.bad .s { color: var(--ruim); } .item-linha.dl .s { color: var(--teal-claro); }
+.item-linha b { color: var(--claro); font-weight: 600; display: block; }
+.item-linha small { color: var(--texto-2); font-size: 12.5px; }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.18); border-top-color: var(--teal); animation: girar .8s linear infinite; flex: none; }
+@keyframes girar { to { transform: rotate(360deg); } }
+
+/* ------------------------------------------------------------ fluxo (arquivo, instalar, primeiro uso) */
+.fluxo-arte { position: absolute; inset: 0 0 0 45%; opacity: .55; }
+.fluxo-veu { position: absolute; inset: 0; background: linear-gradient(90deg, var(--fundo) 45%, rgba(18,18,18,.7) 70%, rgba(18,18,18,.35)); }
+.fluxo { position: absolute; z-index: 2; left: 32px; top: 56px; width: 470px; }
+.fluxo .sobre { font-size: 12px; letter-spacing: .7px; text-transform: uppercase; color: var(--texto-2); }
+.fluxo h1 { margin: 4px 0 8px; font-size: 24px; line-height: 1.15; color: var(--claro); }
+.fluxo p { margin: 0 0 10px; font-size: 14px; line-height: 1.55; }
+.fluxo p b { color: var(--claro); }
+.fluxo .acoes { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.fluxo .resultado { display: flex; gap: 12px; align-items: flex-start; margin: 4px 0 10px; }
+.fluxo .resultado .icone { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 16px; background: rgba(255,255,255,.06); }
+.fluxo .resultado.ok .icone { color: var(--ok); } .fluxo .resultado.warn .icone { color: var(--aviso); } .fluxo .resultado.bad .icone { color: var(--ruim); }
+.fluxo .progresso { display: flex; gap: 12px; align-items: center; margin: 6px 0 12px; font-size: 14px; color: var(--claro); }
+.fluxo .progresso .barra { flex: 1; height: 4px; }
+.fluxo .tecnico { margin-top: 10px; padding: 10px 12px; border-radius: var(--raio); background: var(--fundo-escuro); border: 1px solid var(--borda); font: 12px/1.6 ui-monospace, monospace; color: var(--texto-2); display: none; }
+.fluxo .tecnico.aberto { display: block; }
+.passos { position: absolute; z-index: 2; right: 30px; top: 60px; width: 300px; }
+.passos .item-linha { padding: 6px 0; }
+.passos .item-linha.atual b { color: var(--claro); }
+.passos .item-linha.depois b { color: var(--texto-2); font-weight: 500; }

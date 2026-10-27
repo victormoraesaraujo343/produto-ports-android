@@ -1,0 +1,25 @@
+/* ABRINDO / NÃO ABRIU — deitado */
+.abrindo .ab-arte { position: absolute; inset: 0; }
+.abrindo .ab-arte:not(.arte) { background: #161616; }
+.abrindo .ab-veu { position: absolute; inset: 0; background: rgba(12,12,12,.62); }
+.abrindo .ab-centro { position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 0 60px; }
+.abrindo .logo { font-size: 34px; font-weight: 700; color: #fff; letter-spacing: .4px; text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+.abrindo .ab-linha { display: flex; gap: 10px; align-items: center; color: var(--claro); font-size: 14px; }
+.abrindo .ab-volta { margin: 6px 0 0; font-size: 13px; color: #e6e7ec; }
+.abrindo .ab-volta b { color: #fff; }
+.abrindo .lab-aviso { display: flex; flex-direction: column; gap: 8px; align-items: center; padding: 20px 24px; border: 1px dashed var(--borda-forte); border-radius: 12px; background: rgba(0,0,0,.5); }
+.abrindo .lab-aviso b { color: var(--claro); font-size: 15px; }
+.abrindo .lab-aviso span { font-size: 13px; color: var(--texto-2); }
+.abrindo .lab-aviso .acoes { display: flex; gap: 8px; margin-top: 6px; }
+
+.abrindo .ab-centro.falha { align-items: stretch; justify-content: flex-start; text-align: left; padding: 30px 40px 40px; gap: 10px; }
+.abrindo .falha .resultado { display: flex; gap: 14px; align-items: flex-start; }
+.abrindo .falha .icone { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--ruim); background: rgba(255,255,255,.06); }
+.abrindo .falha h1 { margin: 0 0 4px; font-size: 21px; color: var(--claro); }
+.abrindo .falha p { margin: 0; font-size: 13.5px; color: var(--texto); max-width: 640px; }
+.abrindo .caminhos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-left: 48px; max-width: 760px; }
+.abrindo .caminho-item { text-align: left; padding: 10px 14px; border-radius: var(--raio); background: rgba(13,13,13,.78); border: 1px solid var(--borda); display: flex; flex-direction: column; gap: 2px; }
+.abrindo .caminho-item b { color: var(--claro); font-size: 14px; }
+.abrindo .caminho-item small { color: var(--texto-2); font-size: 12.5px; }
+.abrindo .caminho-item.focado { background: rgba(40,40,40,.9); }
+.abrindo .relatorio { margin: 4px 0 0 48px; padding: 10px 12px; max-width: 760px; border-radius: var(--raio); background: var(--fundo-escuro); border: 1px solid var(--borda); font-size: 11.5px; color: var(--texto-2); white-space: pre-wrap; }

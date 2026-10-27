@@ -1,0 +1,37 @@
+/* DETALHES — deitado (915×412) */
+
+.detalhes .hero-arte { position: absolute; inset: 0 0 0 30%; }
+.detalhes .hero-arte.sem-arte { background: radial-gradient(circle at 70% 30%, #262626, #141414 60%); }
+.detalhes .hero-veu {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--fundo) 34%, rgba(18,18,18,.82) 52%, rgba(18,18,18,.45) 75%, rgba(18,18,18,.7));
+}
+.detalhes .coluna-acao { position: absolute; z-index: 2; left: 32px; top: 52px; width: 400px; }
+.detalhes .logo { font-size: 28px; font-weight: 700; color: #fff; line-height: 1.08; letter-spacing: .3px; }
+.detalhes .meta { margin-top: 4px; font-size: 13px; color: #e6e7ec; }
+.detalhes .linha-estado { margin-top: 8px; }
+.detalhes .acoes { margin-top: 12px; display: flex; gap: 8px; }
+.detalhes .rotulo { font-size: 11.5px; letter-spacing: .7px; text-transform: uppercase; color: var(--texto-2); margin-bottom: 4px; }
+.detalhes .precisa { margin-top: 16px; }
+.detalhes .precisa .item-linha { padding: 4px 0; }
+
+.detalhes .coluna-info {
+  position: absolute; z-index: 2; right: 0; top: 48px; bottom: 40px; width: 400px;
+  overflow-y: auto; scrollbar-width: none; padding: 6px 30px 12px 8px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.detalhes .coluna-info::-webkit-scrollbar { display: none; }
+.detalhes .bloco { padding: 12px 14px; border-radius: var(--raio); background: rgba(13,13,13,.72); border: 1px solid var(--borda); }
+.detalhes .bloco.focado { outline-offset: 2px; }
+.detalhes .bloco p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.5; }
+.detalhes .bloco p:last-child { margin-bottom: 0; }
+.detalhes .bloco b { color: var(--claro); }
+.detalhes .fonte { color: var(--texto-2); font-size: 12.5px !important; }
+.detalhes dl { margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 6px 10px; font-size: 13px; }
+.detalhes dt { color: var(--texto-2); }
+.detalhes dd { margin: 0; color: var(--texto); }
+.btn.pequeno { height: 32px; font-size: 13px; padding-inline: 12px; }
+.detalhes .dicas { right: 30px; }
+.detalhes .precisa .item-linha b { display: inline; }
+.detalhes .precisa .item-linha small { display: block; }
+html[data-precisa-mostrar="problema"] .detalhes .precisa:not(:has(.warn, .bad, .dl)) { display: none; }

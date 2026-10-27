@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" />
+    <title>Ports · Laboratório</title>
+    <style>
+      :root { --claro: #f0f1f7; --texto: #d0d1d7; --texto-2: #a4a5ad; --borda: rgba(255,255,255,.08); --teal: #16b195; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #121212; color: var(--texto); font-family: "Noto Sans", sans-serif; }
+      main { width: min(100% - 32px, 920px); margin: 0 auto; padding: clamp(28px, 6vw, 64px) 0; }
+      h1 { margin: 0 0 8px; color: var(--claro); font-size: clamp(24px, 4vw, 32px); }
+      p { margin: 0 0 28px; max-width: 70ch; line-height: 1.6; color: var(--texto-2); }
+      h2 { margin: 32px 0 10px; font-size: 13px; letter-spacing: .8px; text-transform: uppercase; color: var(--texto-2); }
+      ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      a { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 14px; padding: 14px 18px; background: #1a1a1a; border: 1px solid var(--borda); border-radius: 8px; color: inherit; text-decoration: none; transition: border-color .15s; }
+      a:hover, a:focus-visible { border-color: var(--teal); outline: 0; }
+      .n { font-size: 13px; font-weight: 700; color: var(--teal); }
+      b { display: block; font-size: 16px; color: var(--claro); }
+      small { display: block; margin-top: 2px; font-size: 13px; color: var(--texto-2); }
+      .st { padding: 3px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 700; white-space: nowrap; background: #1f3a33; color: #7fd8c6; }
+      .st.pe { background: #2a2a2a; color: var(--texto-2); }
+      @media (max-width: 559px) { a { grid-template-columns: 28px 1fr; } .st { grid-column: 2; justify-self: start; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Laboratório · Ports pra Android</h1>
+      <p>As telas do launcher com a aparência do Hydra e o comportamento tirado da pesquisa do Roseta. Deitado é o modo com controle. Pra ver em pé, aperte <b style="display:inline;font-size:inherit">V</b> no painel de Refinamento, que abre e fecha com R. Dá pra navegar com teclado ou com um controle de verdade conectado ao PC. Os jogos e as artes são de exemplo.</p>
+
+      <h2>Navegação</h2>
+      <ol>
+        <li><a href="/laboratorio/inicio/index.html"><span class="n">01</span><span><b>Início</b><small>Jogo em foco, recentes, Opções (☰)</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/ports/index.html"><span class="n">02</span><span><b>Ports</b><small>Todos os ports, filtros, ordem, busca com teclado na tela</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/detalhes/index.html?port=oot"><span class="n">03</span><span><b>Detalhes do port</b><small>O que o port precisa, ficha, origem, desinstalar</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/ajustes/index.html"><span class="n">04</span><span><b>Ajustes</b><small>Atualizações, controles, arquivos, catálogo, sobre</small></span><span class="st">Deitado</span></a></li>
+      </ol>
+
+      <h2>Fluxos</h2>
+      <ol>
+        <li><a href="/laboratorio/arquivo/index.html?port=oot"><span class="n">05</span><span><b>Arquivo do jogo</b><small>Escolher, conferir, não serve, preparar, pronto</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/instalar/index.html?port=pd"><span class="n">06</span><span><b>Instalar</b><small>Baixar, conferir, confirmar no Android, instalado</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/instalar/index.html?port=mm&amp;modo=atualizar"><span class="n">06b</span><span><b>Atualizar</b><small>Versão nova, sem pedir confirmação</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/abrindo/index.html?port=sm64"><span class="n">07</span><span><b>Abrindo e não abriu</b><small>Aviso de como voltar; caminhos quando o jogo fecha sozinho</small></span><span class="st">Deitado</span></a></li>
+        <li><a href="/laboratorio/primeiro-uso/index.html"><span class="n">08</span><span><b>Primeiro uso</b><small>Boas-vindas, permissão de instalar, pasta dos jogos</small></span><span class="st">Deitado</span></a></li>
+      </ol>
+
+      <h2>Mockups que deram origem</h2>
+      <ol>
+        <li><a href="/laboratorio/_mockups/01-navegacao.html"><span class="n">M1</span><span><b>Três jeitos de navegar</b><small>A abas, B gaveta, C deitado</small></span><span class="st pe">Histórico</span></a></li>
+        <li><a href="/laboratorio/_mockups/02-a-mais-c.html"><span class="n">M2</span><span><b>A + C com a pesquisa do Roseta</b><small>A direção escolhida (D-003)</small></span><span class="st pe">Histórico</span></a></li>
+      </ol>
+    </main>
+  </body>
+</html>

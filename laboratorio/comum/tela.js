@@ -33,11 +33,12 @@ export const seloHtml = (p, { palavra = false } = {}) => {
 };
 
 /* ------------------------------------------------------------ moldura */
-export function montarTela({ secao, conteudo, dicas = [], classe = "" }) {
+export function montarTela({ secao, conteudo, dicas = [], classe = "", caminho = null }) {
   document.body.innerHTML = `
     <div class="palco">
       <div class="tela ${classe}" data-secao="${secao ?? ""}">
         ${secao ? topoHtml(secao) : ""}
+        ${caminho ? caminhoHtml(caminho) : ""}
         ${conteudo}
         <div class="dicas" data-dicas>${dicasHtml(dicas)}</div>
       </div>
@@ -62,6 +63,20 @@ function topoHtml(secao) {
     ${g("r1", true)}
     <span class="relogio"><span>9:41</span><span aria-label="bateria 87%">▮▮▮ 87%</span></span>
   </header>`;
+}
+
+/* telas de dentro (detalhes, arquivo, instalar…): o caminho mostra onde se
+   está e como voltar (P-35) */
+function caminhoHtml(partes) {
+  return `<header class="caminho" data-lab="caminho">
+    <button type="button" class="voltar" data-voltar aria-label="Voltar">${g("b")}<span class="so-toque-inline">‹</span></button>
+    ${partes.map((t, i) => `<span class="${i === partes.length - 1 ? "aqui" : ""}">${esc(t)}</span>`).join('<span class="sep">›</span>')}
+    <span class="relogio"><span>9:41</span><span aria-label="bateria 87%">▮▮▮ 87%</span></span>
+  </header>`;
+}
+export function voltar(padrao = "inicio") {
+  if (history.length > 1 && document.referrer.startsWith(location.origin)) history.back();
+  else irPara(padrao);
 }
 
 export const dicasHtml = (dicas) => dicas.map(([b, t]) => `<span>${g(b)}${esc(t)}</span>`).join("");

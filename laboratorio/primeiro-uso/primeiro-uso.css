@@ -1,0 +1,18 @@
+/* PRIMEIRO USO — deitado */
+.primeiro-uso .pu-mosaico { position: absolute; inset: -20px -20px -20px 46%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; transform: rotate(-8deg); opacity: .5; }
+.primeiro-uso .pu-mosaico span { border-radius: 8px; aspect-ratio: 3 / 4; }
+.primeiro-uso .pu-veu { position: absolute; inset: 0; background: linear-gradient(90deg, var(--fundo) 46%, rgba(18,18,18,.75) 66%, rgba(18,18,18,.3)); }
+.primeiro-uso .pu { position: absolute; z-index: 2; left: 40px; top: 60px; width: 460px; }
+.primeiro-uso .sobre { font-size: 12px; letter-spacing: .7px; text-transform: uppercase; color: var(--texto-2); }
+.primeiro-uso h1 { margin: 4px 0 10px; font-size: 26px; line-height: 1.15; color: var(--claro); }
+.primeiro-uso p { margin: 0 0 10px; font-size: 14px; line-height: 1.55; }
+.primeiro-uso p b { color: var(--claro); }
+.primeiro-uso .explica { color: var(--texto-2); font-size: 13px; }
+.primeiro-uso .acoes { margin-top: 16px; display: flex; gap: 8px; }
+.primeiro-uso .resultado { display: flex; gap: 12px; align-items: flex-start; }
+.primeiro-uso .resultado .icone { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--ok); background: rgba(255,255,255,.06); }
+.primeiro-uso .estado { font-size: 13px; }
+.primeiro-uso .pu-pontos { position: absolute; z-index: 2; left: 40px; bottom: 18px; display: flex; gap: 6px; }
+.primeiro-uso .pu-pontos i { width: 8px; height: 8px; border-radius: 4px; background: #3a3a3a; transition: width var(--medio); }
+.primeiro-uso .pu-pontos i.atual { width: 22px; background: var(--claro); }
+.primeiro-uso .pu-pontos i.feito { background: var(--texto-2); }
