@@ -20,6 +20,12 @@ Contradição não se resolve em silêncio: aponte e registre a resolução.
 - O ritmo combinado é rápido: **poucas rodadas no lab** (D-004).
 - Só o Victor aprova. "Ficou bom" não é aprovação. No painel, quem marca "Aprovada" é ele.
 
+## Quem faz o quê (pedido do Victor, 2026-10-27)
+
+- **Agentes Haiku 5.5** fazem a maior parte do trabalho pesado: implementar issues, escrever testes, telas do lab, migrações e levantamentos. Cada agente recebe uma issue (ou um brief curto que aponta pra ela) e mexe só nos arquivos dela.
+- **Opus 5.5** orquestra e valida: decide produto e design, escreve as issues e os briefs, divide o trabalho em partes que não se sobrepõem, revisa cada diff contra a issue e roda `:core:test`, `:app:assembleDebug` (e o lab, quando for o caso) antes de aceitar. Trabalho que não passa volta pro agente com o que corrigir.
+- O relatório pro Victor diz o que cada um fez.
+
 ## Referências obrigatórias pra decisões de tela
 
 - Visual: o Hydra (`src/renderer/src/scss/globals.scss` no fork `victormoraesaraujo343/hydra`).
