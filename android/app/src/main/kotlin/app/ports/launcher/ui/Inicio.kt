@@ -72,7 +72,8 @@ fun Inicio(
         // arte do jogo em foco, trocando com um fade curto (P-19/P-20)
         Crossfade(targetState = if (noTodos) null else focado?.port?.id, animationSpec = tween(220), label = "fundo") { id ->
             val pt = itens.find { it.port.id == id }
-            if (pt != null) Arte(pt.port, Modifier.fillMaxSize(), comNome = false, url = pt.port.heroUrl ?: pt.port.capaUrl, larguraMax = 960)
+            // sem fundo oficial, a capa entra borrada (não é arte de tela cheia)
+            if (pt != null) Arte(pt.port, Modifier.fillMaxSize(), comNome = false, url = pt.port.heroUrl ?: pt.port.capaUrl, larguraMax = 960, desfocar = pt.port.heroUrl == null)
             else Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(Color(0xFF2A2A2A), Color(0xFF161616), Color(0xFF101010)))))
         }
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.26f to Color(0xF80E0E0E), 0.56f to Color(0x9E0E0E0E), 1f to Color(0x260E0E0E))))

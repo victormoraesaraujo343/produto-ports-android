@@ -1,5 +1,6 @@
 package app.ports.core
 
+import java.text.Normalizer
 import java.util.Locale
 
 /** Títulos do catálogo: a logo da capa e a busca no SteamGridDB. */
@@ -29,6 +30,20 @@ object Titulo {
     fun limparParaBusca(titulo: String): String {
         val semRuido = espacos.replace(ruido.replace(semParenteses(titulo), " "), " ")
         return semRuido.trim { it.isWhitespace() || it in "-–:,|" }
+    }
+
+    /**
+     * Buscas no SteamGridDB, da mais completa pra mais curta. Com " / " (vários
+     * jogos no título), tenta também a primeira parte sozinha. "Pokémon" vai
+     * sem acento, como o SteamGridDB costuma indexar.
+     */
+    fun consultas(titulo: String): List<String> {
+        val limpo = limparParaBusca(titulo)
+        val partes = if (limpo.contains(" / ")) listOf(limpo, limpo.substringBefore(" / ").trim()) else listOf(limpo)
+        return partes
+            .map { Normalizer.normalize(it, Normalizer.Form.NFC).replace("Pokémon", "Pokemon", ignoreCase = true) }
+            .filter { it.isNotBlank() }
+            .distinct()
     }
 }
 

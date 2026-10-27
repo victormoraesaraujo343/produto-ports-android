@@ -1,6 +1,7 @@
 package app.ports.launcher.dados
 
 import android.content.Context
+import app.ports.core.Casamento
 import app.ports.core.Titulo
 import app.ports.core.Validade
 import kotlinx.coroutines.Dispatchers
@@ -15,17 +16,23 @@ import java.io.IOException
 import java.net.URLEncoder
 
 /**
- * Capa e fundo do jogo no SteamGridDB (mesma lógica do fork do Hydra). Sem
- * chave, nada é buscado. Acertos ficam pra sempre; faltas, 7 dias.
+ * Capa e fundo do jogo no SteamGridDB (mesma lógica do fork do Hydra, com
+ * escolha por nome e por nota). Sem chave, nada é buscado. Acertos ficam pra
+ * sempre; faltas, 7 dias. Sem jogo parecido, não entra capa nenhuma.
  */
 class Capas(contexto: Context) {
     private class ChaveRecusada : Exception()
 
     private val ajustes = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
-    private val arquivo = File(contexto.filesDir, "capas.json")
+    // v2: o cache antigo tinha o primeiro acerto da busca, que muitas vezes era outro jogo
+    private val arquivo = File(contexto.filesDir, "capas-v2.json")
     private val limite = Semaphore(3)
     private val lock = Any()
     private val cache: JSONObject by lazy { carregarCache() }
+
+    init {
+        File(contexto.filesDir, "capas.json").delete()
+    }
 
     @Volatile private var chaveRecusada = false
 
@@ -46,7 +53,7 @@ class Capas(contexto: Context) {
         val busca = Titulo.limparParaBusca(titulo)
         if (key.isEmpty() || busca.isEmpty() || chaveRecusada) return@withContext NADA
         doCache(busca)?.let { return@withContext it }
-        limite.withPermit { consultar(busca, key) }
+        limite.withPermit { consultar(titulo, busca, key) }
     }
 
     /** Resposta do cache, ou nulo se é preciso consultar de novo. */
@@ -59,12 +66,12 @@ class Capas(contexto: Context) {
         }
     }
 
-    private fun consultar(busca: String, key: String): Pair<String?, String?> {
+    private fun consultar(titulo: String, busca: String, key: String): Pair<String?, String?> {
         return try {
-            val id = procurarId(busca, key)
+            val id = procurarId(titulo, key)
             val resultado = if (id == null) NADA else {
-                primeiraUrl("grids/game/$id?dimensions=600x900&types=static", key) to
-                    primeiraUrl("heroes/game/$id", key)
+                melhorUrl("grids/game/$id?dimensions=600x900&types=static", key) to
+                    melhorUrl("heroes/game/$id", key)
             }
             gravar(busca, resultado.first, resultado.second, achou = resultado.first != null || resultado.second != null)
             resultado
@@ -78,14 +85,24 @@ class Capas(contexto: Context) {
         }
     }
 
-    private fun procurarId(busca: String, key: String): Int? {
-        val termo = URLEncoder.encode(busca, "UTF-8").replace("+", "%20")
-        val json = pedir("search/autocomplete/$termo", key) ?: return null
-        return json.optJSONArray("data")?.paraObjetos()?.firstOrNull()?.optInt("id", -1)?.takeIf { it > 0 }
+    /** Id do primeiro termo de busca que acha um jogo parecido com o título. */
+    private fun procurarId(titulo: String, key: String): Int? {
+        for (consulta in Titulo.consultas(titulo)) {
+            val termo = URLEncoder.encode(consulta, "UTF-8").replace("+", "%20")
+            val candidatos = pedir("search/autocomplete/$termo", key)?.optJSONArray("data")?.paraObjetos()
+                .orEmpty()
+                .filter { it.optInt("id", -1) > 0 }
+            val escolhido = Casamento.melhor(consulta, candidatos) { it.optString("name") }
+            if (escolhido != null) return escolhido.optInt("id", -1)
+        }
+        return null
     }
 
-    private fun primeiraUrl(caminho: String, key: String): String? =
-        pedir(caminho, key)?.optJSONArray("data")?.paraObjetos()?.firstOrNull()?.optTexto("url")
+    /** A imagem de maior nota (`score`) do SteamGridDB. Sem nota, a primeira. */
+    private fun melhorUrl(caminho: String, key: String): String? =
+        pedir(caminho, key)?.optJSONArray("data")?.paraObjetos()
+            ?.maxByOrNull { it.optDouble("score", Double.NEGATIVE_INFINITY) }
+            ?.optTexto("url")
 
     private fun pedir(caminho: String, key: String): JSONObject? {
         val resposta = Rede.texto("$BASE/$caminho", mapOf("Authorization" to "Bearer $key"))

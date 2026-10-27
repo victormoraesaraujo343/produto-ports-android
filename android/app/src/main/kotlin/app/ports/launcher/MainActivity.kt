@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
@@ -84,6 +85,8 @@ class MainActivity : ComponentActivity() {
                 val estado by repositorio.estado.collectAsState()
                 val pilha = remember { mutableStateListOf<Tela>(Tela.DeSecao(Secao.INICIO)) }
                 var focadoId by remember { mutableStateOf<String?>(null) }
+                // o console escolhido fica enquanto o app está aberto (passa por todas as seções)
+                var console by rememberSaveable { mutableStateOf<String?>(null) }
                 val tela = pilha.last()
 
                 LaunchedEffect(Unit) { repositorio.atualizar() }
@@ -120,7 +123,10 @@ class MainActivity : ComponentActivity() {
                                 )
                             Secao.PORTS ->
                                 if (pronto == null) TelaSemLista(Secao.PORTS, estado, { irSecao(it) }, { atualizarLista() })
-                                else Ports(visiveis, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { if (Textos.naoInstalado(it.estado)) detalhes(it.port.id) else acao(it) }, aoSecao = { irSecao(it) })
+                                else Ports(
+                                    visiveis, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { if (Textos.naoInstalado(it.estado)) detalhes(it.port.id) else acao(it) }, aoSecao = { irSecao(it) },
+                                    console = console, aoConsole = { console = it },
+                                )
                             Secao.AJUSTES -> Ajustes(
                                 atualizadoEm = pronto?.atualizadoEm,
                                 aoSecao = { irSecao(it) },

@@ -19,6 +19,11 @@ class TitulosTest {
         assertEquals("PCSX Rearmed", Titulo.limparParaBusca("PCSX Rearmed"))
     }
 
+    @Test fun `consultas trazem a primeira parte quando ha barra e Pokemon sem acento`() {
+        assertEquals(listOf("Pokemon Gold / Silver / Crystal", "Pokemon Gold"), Titulo.consultas("Pokémon Gold / Silver / Crystal (Recomp)"))
+        assertEquals(listOf("Banjo-Kazooie"), Titulo.consultas("Banjo-Kazooie (Recomp)"))
+    }
+
     @Test fun `plataforma conhecida ganha nome e desconhecida volta crua`() {
         assertEquals("Nintendo 64", Plataformas.nome("n64"))
         assertEquals("Xbox 360", Plataformas.nome("xbox360"))

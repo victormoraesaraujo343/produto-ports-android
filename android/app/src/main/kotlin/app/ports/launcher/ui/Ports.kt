@@ -1,23 +1,30 @@
 package app.ports.launcher.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,13 +35,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.ports.core.Consoles
 import app.ports.core.Estado
 import app.ports.core.Filtro
 import app.ports.core.PortNaTela
@@ -45,6 +57,7 @@ import app.ports.core.Titulo
  * PORTS — deitado. Todos os ports em A–Z (ordem estável), filtros pelo que o
  * app já sabe, capas verticais (aprovado na R1). O port em foco aparece na
  * faixa de baixo: contexto na seleção, sem abrir outra tela.
+ * À direita dos filtros, o console: abre um painel lateral com os consoles da lista.
  */
 @Composable
 fun Ports(
@@ -53,6 +66,8 @@ fun Ports(
     aoFocar: (PortNaTela?) -> Unit,
     aoAcao: (PortNaTela) -> Unit,
     aoSecao: (Secao) -> Unit,
+    console: String?,
+    aoConsole: (String?) -> Unit,
 ) {
     var filtro by rememberSaveable { mutableStateOf(Filtro.TODOS) }
     // o foco guarda o id: a faixa de baixo mostra sempre o estado atual do port
@@ -60,12 +75,32 @@ fun Ports(
     val focado = todos.find { it.port.id == focadoId }
     val entrada = LocalEntrada.current.atual
     val pedirCapa = LocalPedirCapa.current
-    val lista = todos.filter(filtro.aceita)
+    // o console guardado pode ter saído do catálogo: aí vale Todos
+    val consoleAtivo = console?.takeIf { escolhido -> todos.any { Consoles.nomeDe(it.port.plataforma) == escolhido } }
+    val porConsole = Consoles.filtrar(todos, consoleAtivo)
+    val lista = porConsole.filter(filtro.aceita)
+
+    var painelAberto by remember { mutableStateOf(false) }
+    var voltarAoChip by remember { mutableStateOf(false) }
+    val chipConsole = remember { FocusRequester() }
+    fun fecharPainel() {
+        painelAberto = false
+        voltarAoChip = true
+    }
+    // o foco volta ao chip só depois que o painel sai da tela (senão o foco do painel some junto)
+    LaunchedEffect(voltarAoChip) {
+        if (voltarAoChip) {
+            chipConsole.focarQuandoPuder()
+            voltarAoChip = false
+        }
+    }
+    // com o painel aberto, B só fecha o painel (esta regra vence a de voltar de seção)
+    BackHandler(enabled = painelAberto) { fecharPainel() }
 
     Fundo {
         Topo(Secao.PORTS, aoSecao)
 
-        // filtros
+        // filtros de estado e, à direita, o de console; as contas seguem o console
         Row(Modifier.padding(start = 21.dp, end = 26.dp, top = 46.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.CenterVertically) {
             Filtro.entries.forEach { f ->
                 var temFoco by remember { mutableStateOf(false) }
@@ -82,8 +117,24 @@ fun Ports(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Texto(f.nome, Tipo.secao.copy(fontSize = 13.sp, color = if (sel) Color(0xFF121212) else Cor.texto))
-                    Texto("${todos.count(f.aceita)}", Tipo.dica.copy(fontSize = 12.sp, color = if (sel) Color(0xFF4A4B52) else Cor.texto2))
+                    Texto("${porConsole.count(f.aceita)}", Tipo.dica.copy(fontSize = 12.sp, color = if (sel) Color(0xFF4A4B52) else Cor.texto2))
                 }
+            }
+            Box(Modifier.weight(1f))
+            var temFocoConsole by remember { mutableStateOf(false) }
+            val selConsole = consoleAtivo != null
+            Row(
+                Modifier.focusRequester(chipConsole)
+                    .onFocusChanged { temFocoConsole = it.isFocused; if (it.isFocused) { focadoId = null; aoFocar(null) } }
+                    .contornoFoco(temFocoConsole, raio = Raio, entrada = entrada)
+                    .height(32.dp)
+                    .clip(RoundedCornerShape(Raio))
+                    .then(if (selConsole) Modifier.background(Cor.claro) else Modifier.border(1.dp, Cor.borda, RoundedCornerShape(Raio)))
+                    .acionavel { painelAberto = true }
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Texto("Console: ${consoleAtivo ?: "Todos"}", Tipo.secao.copy(fontSize = 13.sp, color = if (selConsole) Color(0xFF121212) else Cor.texto))
             }
         }
 
@@ -136,5 +187,77 @@ fun Ports(
             Box(Modifier.weight(1f))
             Dicas(if (pt == null) emptyList() else if (Textos.naoInstalado(pt.estado)) listOf(Botao.A to "Detalhes") else listOf(Botao.A to Textos.de(pt.estado).acao, Botao.Y to "Detalhes"))
         }
+
+        // painel de consoles, por cima de tudo; "Todos" é nulo
+        if (painelAberto) PainelConsoles(
+            itens = listOf<Pair<String?, Int>>(null to todos.size) + Consoles.agrupar(todos),
+            atual = consoleAtivo,
+            aoEscolher = { escolhido -> aoConsole(escolhido); fecharPainel() },
+            aoFechar = { fecharPainel() },
+        )
+    }
+}
+
+/**
+ * Painel lateral (direita, altura toda) com os consoles da lista. O foco começa
+ * na escolha atual e não sai do painel até fechar (`exit` cancelado). Toque fora fecha.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun BoxScope.PainelConsoles(
+    itens: List<Pair<String?, Int>>,
+    atual: String?,
+    aoEscolher: (String?) -> Unit,
+    aoFechar: () -> Unit,
+) {
+    val naAtual = remember { FocusRequester() }
+    LaunchedEffect(Unit) { naAtual.focarQuandoPuder() }
+
+    Box(Modifier.fillMaxSize().background(Color(0x73000000)).clickableSemFoco(aoFechar))
+    Column(
+        Modifier
+            .align(Alignment.CenterEnd)
+            .fillMaxHeight()
+            .width(300.dp)
+            .background(Cor.elevado)
+            .drawBehind { drawLine(Cor.borda, Offset(0f, 0f), Offset(0f, size.height), strokeWidth = 1.dp.toPx()) }
+            .focusProperties { exit = { FocusRequester.Cancel } }
+            .padding(start = 26.dp, end = 22.dp, top = 40.dp, bottom = 16.dp),
+    ) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            itens.forEach { (nome, n) ->
+                val sel = nome == atual
+                ItemConsole(
+                    nome = nome ?: "Todos",
+                    n = n,
+                    sel = sel,
+                    foco = if (sel) naAtual else null,
+                    aoAcionar = { aoEscolher(nome) },
+                )
+            }
+        }
+        Dicas(listOf(Botao.A to "Escolher", Botao.B to "Fechar"), Modifier.padding(top = 10.dp))
+    }
+}
+
+/** Uma linha do painel: nome do console e a conta. Escolhido, fica claro como os filtros. */
+@Composable
+private fun ItemConsole(nome: String, n: Int, sel: Boolean, foco: FocusRequester?, aoAcionar: () -> Unit) {
+    var temFoco by remember { mutableStateOf(false) }
+    val entrada = LocalEntrada.current.atual
+    Row(
+        Modifier
+            .then(if (foco != null) Modifier.focusRequester(foco) else Modifier)
+            .onFocusChanged { temFoco = it.isFocused }
+            .contornoFoco(temFoco, raio = Raio, entrada = entrada)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Raio))
+            .then(if (sel) Modifier.background(Cor.claro) else Modifier.border(1.dp, Cor.borda, RoundedCornerShape(Raio)))
+            .acionavel(aoAcionar)
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Texto(nome, Tipo.botao.copy(fontSize = 14.sp, color = if (sel) Color(0xFF121212) else Cor.texto), Modifier.weight(1f))
+        Texto("$n", Tipo.dica.copy(fontSize = 12.5.sp, color = if (sel) Color(0xFF4A4B52) else Cor.texto2), Modifier.padding(start = 10.dp))
     }
 }

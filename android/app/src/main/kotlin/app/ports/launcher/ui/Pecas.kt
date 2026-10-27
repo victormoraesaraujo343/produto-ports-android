@@ -41,6 +41,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
@@ -86,7 +87,8 @@ val LocalPedirCapa = compositionLocalOf<(String) -> Unit> { {} }
 /* ------------------------------------------------------------ arte
    Gradiente com a cor do jogo e o nome desenhado (como no lab). Com `url`, a
    imagem entra por cima quando chega; enquanto não chega, ou se falhar, fica
-   o gradiente com o nome. Port sem arte mostra as iniciais (P-08). */
+   o gradiente com o nome. Port sem arte mostra as iniciais (P-08).
+   `desfocar`: a imagem é só fundo (a capa, sem o fundo oficial): sai borrada e escurecida. */
 @Composable
 fun Arte(
     p: Port,
@@ -95,6 +97,7 @@ fun Arte(
     tamanhoNome: TextUnit = 13.sp,
     url: String? = null,
     larguraMax: Int = 400,
+    desfocar: Boolean = false,
 ) {
     val c = p.cores
     val repositorio = LocalRepositorio.current
@@ -110,7 +113,13 @@ fun Arte(
         contentAlignment = Alignment.Center,
     ) {
         if (img != null) {
-            Image(img, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            Image(
+                img,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().then(if (desfocar) Modifier.blur(24.dp) else Modifier),
+                contentScale = ContentScale.Crop,
+            )
+            if (desfocar) Box(Modifier.fillMaxSize().background(Color(0x8C0E0E0E)))
         } else if (comNome) BasicText(
             if (c != null) p.logo else iniciais(p.titulo),
             Modifier.padding(10.dp),

@@ -1,5 +1,10 @@
 package app.ports.launcher.ui
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +34,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.ports.core.Estado
@@ -48,6 +54,7 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
     val repositorio = LocalRepositorio.current
     val acao = if (pt.estado == Estado.NAO_RODA) "Instalar mesmo assim" else Textos.de(pt.estado).acao
     val entrada = LocalEntrada.current.atual
+    val contexto = LocalContext.current
     // a release (versão, tamanho) e as capas chegam aqui, depois que a tela abre
     LaunchedEffect(p.id) {
         repositorio.detalhar(p.id)
@@ -55,7 +62,7 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
     }
 
     Fundo {
-        Arte(p, Modifier.fillMaxSize().padding(start = 270.dp), comNome = false, url = p.heroUrl ?: p.capaUrl, larguraMax = 960)
+        Arte(p, Modifier.fillMaxSize().padding(start = 270.dp), comNome = false, url = p.heroUrl ?: p.capaUrl, larguraMax = 960, desfocar = p.heroUrl == null)
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.34f to Cor.fundo, 0.52f to Color(0xD1121212), 0.75f to Color(0x73121212), 1f to Color(0xB3121212))))
 
         // ‹ só no toque; com controle, B volta (dica embaixo)
@@ -74,6 +81,7 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
                 Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     BotaoFocavel(acao, primario = pt.estado != Estado.NAO_RODA, botao = Botao.A, focoRef = principal, aoAcionar = { aoAcao(pt) })
                     if (pt.estado == Estado.ATUALIZAR) BotaoFocavel("Atualizar", primario = false, botao = null, aoAcionar = { aoAtualizar(pt) })
+                    BotaoFocavel("GitHub ↗", primario = false, botao = null, aoAcionar = { abrirGithub(contexto, p.repo) })
                 }
                 LaunchedEffect(Unit) { principal.focarQuandoPuder() }
 
@@ -92,6 +100,16 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
             }
         }
         Dicas(listOf(Botao.B to "Voltar"),Modifier.align(Alignment.BottomEnd).padding(end = 30.dp, bottom = 10.dp))
+    }
+}
+
+/** Abre a página do projeto no navegador. Sem navegador, avisa em um toque. */
+private fun abrirGithub(contexto: Context, repo: String) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/$repo")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    try {
+        contexto.startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        Toast.makeText(contexto, "Sem navegador.", Toast.LENGTH_SHORT).show()
     }
 }
 
