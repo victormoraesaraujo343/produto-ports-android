@@ -72,13 +72,14 @@ object ImagensDoReadme {
         return "https://raw.githubusercontent.com/$dono/$repo/$ramo/$caminho"
     }
 
-    /** Fora SVG, badges (shields.io, workflows) e logos, ícones, banners e botões de apoio. Vale pelo caminho e pelo alt. */
+    /** Fora SVG, badges (shields.io, workflows), logos, ícones, banners, botões de apoio e telas "secondary" (segunda tela). Vale pelo caminho e pelo alt. */
     fun ehDeJogo(url: String, alt: String): Boolean {
         val caminho = url.substringBefore('?').substringBefore('#').lowercase()
         if (caminho.endsWith(".svg")) return false
         if (marcasDeBadge.any { caminho.contains(it) }) return false
         if (caminho.contains("github.com/") && caminho.contains("/workflows/")) return false
         val texto = caminho + " " + alt.lowercase()
+        if ("secondary" in texto) return false
         return marcasDeLogo.none { texto.contains(it) }
     }
 }
@@ -86,15 +87,18 @@ object ImagensDoReadme {
 /** Filtro das pastas de imagem do repositório (árvore do git) e o endereço cru de cada uma. */
 object FiltroRepo {
     private val extensoes = listOf(".png", ".jpg", ".jpeg", ".webp", ".gif")
-    private val pastas = listOf("screenshot", "screens", "docs/", "assets/", "images/", "media/", "img/")
-    private val recusadas = listOf("icon", "logo", "mipmap", "drawable", "/res/", "badge", "font", "ui/", "sprite", "-secondary")
+    private val pastas = listOf("screenshot", "screens", "docs/", "media/", "images/", "img/")
+    private val recusadas = listOf("icon", "logo", "mipmap", "drawable", "/res/", "badge", "font", "ui/", "sprite", "secondary")
+    /** Código de terceiros embutido no repositório: as imagens são da documentação dele, não do jogo. */
+    private val terceiros = listOf("/jni/", "/vendor/", "/third_party/", "/thirdparty/", "/external/", "/deps/", "/node_modules/", "/libs/", "/submodules/")
 
     /** O caminho (a partir da raiz do repositório) é uma imagem de jogo? */
     fun ehImagemDeJogo(caminho: String): Boolean {
         val c = caminho.lowercase()
         return extensoes.any { c.endsWith(it) } &&
             pastas.any { c.contains(it) } &&
-            recusadas.none { "/$c".contains(it) }
+            recusadas.none { "/$c".contains(it) } &&
+            terceiros.none { "/$c".contains(it) }
     }
 
     /** Endereço cru do arquivo no GitHub, com cada parte do caminho codificada. */
@@ -142,22 +146,45 @@ object Libretro {
             .distinct()
             .toList()
 
-    /** Os nomes que são o jogo do `titulo` (mesma regra do Casamento), de todas as regiões e versões. */
-    fun casam(titulo: String, nomes: List<String>): List<String> = nomes.filter { pontuar(titulo, it) != null }
+    /**
+     * Os nomes que são um dos jogos do `titulo` (mesma regra do Casamento), de
+     * todas as regiões e versões. Um título com " / " casa cada parte.
+     */
+    fun casam(titulo: String, nomes: List<String>): List<String> {
+        val buscas = Titulo.porParte(titulo)
+        return nomes.filter { pontuar(buscas, it) != null }
+    }
 
     /**
-     * O nome de maior nota pro `titulo`, ou nulo. Empate vai pro nome com (USA),
-     * e depois pelo primeiro da lista.
+     * Os mesmos nomes de [casam], mas intercalados por parte do título (Gold,
+     * Silver, Crystal, Gold, Silver…), pra que o limite de capturas não deixe
+     * de fora uma parte inteira.
      */
-    fun melhor(titulo: String, nomes: List<String>): String? =
-        nomes.mapNotNull { nome -> pontuar(titulo, nome)?.let { nome to it } }
-            .sortedWith(compareByDescending<Pair<String, Double>> { it.second }.thenBy { !it.first.contains("(USA") })
+    fun casamIntercalado(titulo: String, nomes: List<String>): List<String> {
+        val grupos = Titulo.porParte(titulo).map { busca -> nomes.filter { pontuar(listOf(busca), it) != null } }
+        val saida = LinkedHashSet<String>()
+        for (i in 0 until (grupos.maxOfOrNull { it.size } ?: 0)) {
+            for (grupo in grupos) grupo.getOrNull(i)?.let { saida += it }
+        }
+        return saida.toList()
+    }
+
+    /**
+     * O nome de maior nota pra primeira parte do `titulo` (o jogo principal), ou
+     * nulo. Empate vai pro nome com (USA), depois o mais curto, e por fim o
+     * primeiro da lista.
+     */
+    fun melhor(titulo: String, nomes: List<String>): String? {
+        val primeira = Titulo.porParte(titulo).firstOrNull() ?: return null
+        return nomes.mapNotNull { nome -> pontuar(listOf(primeira), nome)?.let { nome to it } }
+            .sortedWith(compareByDescending<Pair<String, Double>> { it.second }.thenBy { !it.first.contains("(USA") }.thenBy { it.first.length })
             .firstOrNull()?.first
+    }
 
     /** Tira as tags de região e revisão antes de comparar: "Banjo-Kazooie (USA) (Rev 1)" vira "Banjo-Kazooie". */
-    private fun pontuar(titulo: String, nome: String): Double? {
+    private fun pontuar(buscas: List<String>, nome: String): Double? {
         val alvo = Titulo.semParenteses(nome)
-        return Titulo.consultas(titulo).mapNotNull { Casamento.pontuar(it, alvo) }.maxOrNull()
+        return buscas.mapNotNull { Casamento.pontuar(it, alvo) }.maxOrNull()
     }
 }
 

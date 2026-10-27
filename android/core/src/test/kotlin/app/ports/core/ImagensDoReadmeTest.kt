@@ -61,6 +61,11 @@ class ImagensDoReadmeTest {
         assertFalse(ImagensDoReadme.ehDeJogo("https://github.com/dono/repo/workflows/ci/badge.png", "CI"))
     }
 
+    @Test fun `tela secondary do README fica de fora`() {
+        assertFalse(ImagensDoReadme.ehDeJogo("https://raw.githubusercontent.com/d/r/main/docs/slot-select-secondary.png", "Seleção"))
+        assertFalse(ImagensDoReadme.ehDeJogo("https://raw.githubusercontent.com/d/r/main/docs/x.png", "Second screen (secondary)"))
+    }
+
     @Test fun `logo, icone e apoio pelo caminho ou pelo alt ficam de fora`() {
         assertFalse(ImagensDoReadme.ehDeJogo("https://raw.githubusercontent.com/d/r/main/docs/logo.png", "Port"))
         assertFalse(ImagensDoReadme.ehDeJogo("https://raw.githubusercontent.com/d/r/main/docs/x.png", "Discord"))

@@ -24,6 +24,11 @@ class TitulosTest {
         assertEquals(listOf("Banjo-Kazooie"), Titulo.consultas("Banjo-Kazooie (Recomp)"))
     }
 
+    @Test fun `por parte cada jogo do titulo vira uma busca e a franquia passa pra parte de uma palavra`() {
+        assertEquals(listOf("Pokemon Gold", "Pokemon Silver", "Pokemon Crystal"), Titulo.porParte("Pokémon Gold / Silver / Crystal (Recomp)"))
+        assertEquals(listOf("Banjo-Kazooie"), Titulo.porParte("Banjo-Kazooie (Recomp)"))
+    }
+
     @Test fun `plataforma conhecida ganha nome e desconhecida volta crua`() {
         assertEquals("Nintendo 64", Plataformas.nome("n64"))
         assertEquals("Xbox 360", Plataformas.nome("xbox360"))

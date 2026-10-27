@@ -47,6 +47,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Imagem da galeria: carrega pelo repositório e aparece quando chega (nada enquanto isso). */
@@ -107,31 +108,20 @@ private fun CamadaFundo(url: String, semZoom: Boolean) {
     }
 }
 
-/** Miniatura de 64×44, sem legenda. Com foco, contorno claro (fora da caixa, sem empurrar as vizinhas). A ou toque abre o visor. */
+/** Miniatura de 56×38, sem legenda. Com foco, contorno claro por fora. A (ou toque) abre o visor em tela cheia. */
 @Composable
 fun Miniatura(url: String, focoRef: FocusRequester, aoFocar: () -> Unit, aoAbrir: () -> Unit) {
     var temFoco by remember { mutableStateOf(false) }
     val entrada = LocalEntrada.current.atual
     Box(
         Modifier
-            .size(64.dp, 44.dp)
+            .size(56.dp, 38.dp)
             .focusRequester(focoRef)
             .onFocusChanged {
                 temFoco = it.isFocused
                 if (it.isFocused) aoFocar()
             }
-            .drawBehind {
-                if (temFoco && entrada != Entrada.TOQUE) {
-                    val folga = 4.5.dp.toPx()
-                    drawRoundRect(
-                        color = Cor.claro,
-                        topLeft = Offset(-folga, -folga),
-                        size = Size(size.width + 2 * folga, size.height + 2 * folga),
-                        cornerRadius = CornerRadius(8.dp.toPx()),
-                        style = Stroke(width = 3.dp.toPx()),
-                    )
-                }
-            }
+            .marcaDeFoco(temFoco, 6.dp, entrada)
             .background(Color(0xFF1B1B1B))
             .clip(RoundedCornerShape(6.dp))
             .acionavel(aoAbrir),
@@ -140,19 +130,37 @@ fun Miniatura(url: String, focoRef: FocusRequester, aoFocar: () -> Unit, aoAbrir
     }
 }
 
-/** Visor da galeria: 440×248, a imagem inteira. Toque abre em tela cheia. */
+/** Visor da galeria: 400×225 (16:9), a imagem inteira. Foco ou toque abrem em tela cheia com A. */
 @Composable
 fun Visor(url: String, aoAbrir: () -> Unit) {
+    var temFoco by remember { mutableStateOf(false) }
+    val entrada = LocalEntrada.current.atual
     Box(
         Modifier
-            .size(440.dp, 248.dp)
+            .size(400.dp, 225.dp)
+            .onFocusChanged { temFoco = it.isFocused }
+            .marcaDeFoco(temFoco, Raio, entrada)
             .clip(RoundedCornerShape(Raio))
             .background(Color(0xFF0B0B0B))
             .border(1.dp, Cor.borda, RoundedCornerShape(Raio))
-            .clickableSemFoco(aoAbrir),
+            .acionavel(aoAbrir),
         contentAlignment = Alignment.Center,
     ) {
         ImagemGaleria(url, larguraMax = 960, escala = ContentScale.Fit, modifier = Modifier.fillMaxSize())
+    }
+}
+
+/** Contorno claro por fora da caixa, sem empurrar os vizinhos. Com controle, só quando tem foco. */
+private fun Modifier.marcaDeFoco(focado: Boolean, raio: Dp, entrada: Entrada): Modifier = drawBehind {
+    if (focado && entrada != Entrada.TOQUE) {
+        val folga = 4.5.dp.toPx()
+        drawRoundRect(
+            color = Cor.claro,
+            topLeft = Offset(-folga, -folga),
+            size = Size(size.width + 2 * folga, size.height + 2 * folga),
+            cornerRadius = CornerRadius(raio.toPx() + folga),
+            style = Stroke(width = 3.dp.toPx()),
+        )
     }
 }
 

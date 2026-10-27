@@ -40,11 +40,26 @@ object Titulo {
     fun consultas(titulo: String): List<String> {
         val limpo = limparParaBusca(titulo)
         val partes = if (limpo.contains(" / ")) listOf(limpo, limpo.substringBefore(" / ").trim()) else listOf(limpo)
-        return partes
-            .map { Normalizer.normalize(it, Normalizer.Form.NFC).replace("Pokémon", "Pokemon", ignoreCase = true) }
-            .filter { it.isNotBlank() }
-            .distinct()
+        return partes.map(::arrumar).filter { it.isNotBlank() }.distinct()
     }
+
+    /**
+     * Buscas por jogo, uma por parte de um título com " / " ("Pokemon Gold / Silver /
+     * Crystal" vira Pokemon Gold, Pokemon Silver, Pokemon Crystal). Parte de uma
+     * palavra só ganha a franquia da primeira ("Silver" vira "Pokemon Silver").
+     * Sem " / ", é a própria busca.
+     */
+    fun porParte(titulo: String): List<String> {
+        val partes = limparParaBusca(titulo).split(" / ").map { it.trim() }.filter { it.isNotEmpty() }
+        if (partes.size < 2) return consultas(titulo)
+        val franquia = partes[0].split(" ").dropLast(1).joinToString(" ")
+        val buscas = listOf(partes[0]) + partes.drop(1).map { if (franquia.isNotEmpty() && !it.contains(" ")) "$franquia $it" else it }
+        return buscas.map(::arrumar).filter { it.isNotBlank() }.distinct()
+    }
+
+    /** NFC e "Pokémon" sem acento, como o SteamGridDB e o libretro costumam indexar. */
+    private fun arrumar(texto: String): String =
+        Normalizer.normalize(texto, Normalizer.Form.NFC).replace("Pokémon", "Pokemon", ignoreCase = true)
 }
 
 /** Nomes de plataforma pra mostrar na tela. Id desconhecido volta como veio. */

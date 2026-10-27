@@ -117,10 +117,20 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
             Texto("‹", Tipo.logo.copy(fontSize = 28.sp))
         }
 
-        Row(Modifier.fillMaxSize().padding(top = 50.dp, end = 34.dp)) {
-            // coluna da ação
+        // o Odin tem ~830×467 dp (1920×1080 a 369 dpi), não 960×540: a coluna da direita pega o que sobrar
+        Row(Modifier.fillMaxSize().padding(top = 28.dp, end = 32.dp)) {
+            // coluna da ação: galeria em cima do nome, depois título, estado e botões
             Column(Modifier.padding(start = 32.dp).width(400.dp)) {
-                Texto(Titulo.semParenteses(p.titulo), Tipo.logo.copy(fontSize = 28.sp))
+                if (imagens.isNotEmpty()) {
+                    Visor(imagens[atual]) { visorAberto = true }
+                    // com muitas imagens a faixa rola na horizontal; a folga de 6 dp deixa o contorno de foco aparecer
+                    Row(Modifier.padding(top = 4.dp).horizontalScroll(rememberScrollState()).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        imagens.forEachIndexed { i, url ->
+                            Miniatura(url, focos[i], aoFocar = { irPara(i) }, aoAbrir = { irPara(i); visorAberto = true })
+                        }
+                    }
+                }
+                Texto(Titulo.semParenteses(p.titulo), Tipo.logo.copy(fontSize = 28.sp), Modifier.padding(top = 6.dp))
                 val plataforma = plataformaMostrada(p.plataforma)
                 Texto(listOfNotNull(p.nomePort, plataforma).joinToString(" · "), Tipo.corpo.copy(fontSize = 13.sp, color = Color(0xFFE6E7EC)), Modifier.padding(top = 4.dp))
                 Box(Modifier.padding(top = 8.dp)) { LinhaEstado(pt) }
@@ -130,27 +140,14 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
                     BotaoFocavel("GitHub ↗", primario = false, botao = null, aoAcionar = { abrirGithub(contexto, p.repo) })
                 }
                 LaunchedEffect(Unit) { principal.focarQuandoPuder() }
-
-                Texto("O QUE O PORT PRECISA", Tipo.rotulo, Modifier.padding(top = 14.dp, bottom = 4.dp))
-                Precisa(pt)
             }
-            Box(Modifier.weight(1f))
-            // coluna da direita: galeria (visor e miniaturas) e, embaixo, Sobre e Ficha. Rola com ↓.
-            // 6 dp de folga pros contornos de foco não serem cortados pela rolagem
+            // coluna da direita: o que o port precisa, Sobre e Ficha. Rola com ↓.
             Column(
-                Modifier.width(452.dp).fillMaxHeight().padding(horizontal = 6.dp).verticalScroll(rememberScrollState()).padding(bottom = 40.dp),
+                Modifier.weight(1f).fillMaxHeight().padding(start = 24.dp).verticalScroll(rememberScrollState()).padding(bottom = 40.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (imagens.isNotEmpty()) {
-                    Visor(imagens[atual]) { visorAberto = true }
-                    // com muitas imagens a faixa rola na horizontal; a folga de 6 dp deixa o contorno de foco aparecer
-                    Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 6.dp), horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-                        imagens.forEachIndexed { i, url ->
-                            Miniatura(url, focos[i], aoFocar = { irPara(i) }, aoAbrir = { irPara(i); visorAberto = true })
-                        }
-                    }
-                    Texto("↓ Sobre e ficha", Tipo.dica.copy(fontSize = 12.5.sp))
-                }
+                Texto("O QUE O PORT PRECISA", Tipo.rotulo, Modifier.padding(top = 4.dp))
+                Precisa(pt)
                 if (p.descricao.isNotBlank()) Bloco("SOBRE", entrada) { Texto(p.descricao, Tipo.corpo.copy(fontSize = 13.5.sp, lineHeight = 20.sp)) }
                 Bloco("FICHA", entrada) {
                     if (p.tipo.isNotBlank()) Ficha("Tipo", p.tipo.replaceFirstChar { it.uppercase() })

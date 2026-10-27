@@ -18,6 +18,9 @@ import java.util.Base64
 
 private const val MAXIMO = 10
 
+/** Até 5 imagens do próprio repositório; o resto da galeria é de capturas do jogo e da tela de título. */
+private const val REPOSITORIO_MAXIMO = 5
+
 /**
  * Galeria de gameplay do Detalhes, na ordem: imagens do próprio port (README e
  * pastas de imagem do repositório), capturas do jogo no libretro-thumbnails
@@ -28,7 +31,11 @@ private const val MAXIMO = 10
  * Em memória, o que foi lido dos arquivos; em disco, em `filesDir`.
  */
 class Midia(contexto: Context) {
-    private val galeriaArq = File(contexto.filesDir, "galeria.json")
+    // v2: o cache antigo tinha as imagens do assets/ (arte do Pokéwalker) e nenhuma captura
+    private val galeriaArq = File(contexto.filesDir, "galeria-v3.json")
+    init {
+        File(contexto.filesDir, "galeria.json").delete(); File(contexto.filesDir, "galeria-v2.json").delete()
+    }
     private val libretroArq = File(contexto.filesDir, "midia-libretro.json")
     private val hashesArq = File(contexto.filesDir, "midia-hashes.json")
     private val pasta = File(contexto.cacheDir, "midia").apply { mkdirs() }
@@ -67,7 +74,7 @@ class Midia(contexto: Context) {
         try { doRepositorio += doReadme(p.repo) } catch (_: IOException) { completo = false }
         try { doRepositorio += doArvore(p.repo) } catch (_: IOException) { completo = false }
 
-        val sistema = Libretro.sistemaDe(p.plataforma) ?: return doRepositorio.take(MAXIMO) to completo
+        val sistema = Libretro.sistemaDe(p.plataforma) ?: return doRepositorio.take(REPOSITORIO_MAXIMO) to completo
         val titulo = try {
             tituloDaCaptura(sistema, p.titulo)
         } catch (_: IOException) {
@@ -76,7 +83,7 @@ class Midia(contexto: Context) {
         }
         // a tela de título sempre entra por último, então guarda uma vaga pra ela
         val reserva = if (titulo != null) 1 else 0
-        val repoParte = doRepositorio.take(MAXIMO - reserva)
+        val repoParte = doRepositorio.take(REPOSITORIO_MAXIMO)
         val vagas = MAXIMO - reserva - repoParte.size
         val capturas = if (vagas <= 0) emptyList() else try {
             capturasUnicas(sistema, p.titulo, vagas) { completo = false }
@@ -133,7 +140,7 @@ class Midia(contexto: Context) {
      * Uma captura que falha só sai da lista (e avisa por `falhou`).
      */
     private fun capturasUnicas(sistema: String, titulo: String, vagas: Int, falhou: () -> Unit): List<String> {
-        val candidatas = Libretro.casam(titulo, listagem(sistema, Libretro.SNAPS))
+        val candidatas = Libretro.casamIntercalado(titulo, listagem(sistema, Libretro.SNAPS))
             .map { Libretro.arquivo(sistema, Libretro.SNAPS, it) }
         val vistas = HashSet<String>()
         val saida = ArrayList<String>()

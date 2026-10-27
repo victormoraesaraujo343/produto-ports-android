@@ -9,7 +9,8 @@ class FiltroRepoTest {
     @Test fun `aceita imagens de pasta de jogo`() {
         assertTrue(FiltroRepo.ehImagemDeJogo("docs/tela1.png"))
         assertTrue(FiltroRepo.ehImagemDeJogo("screenshots/a.JPG"))
-        assertTrue(FiltroRepo.ehImagemDeJogo("assets/x.webp"))
+        assertTrue(FiltroRepo.ehImagemDeJogo("screenshots/x.webp"))
+        assertTrue(FiltroRepo.ehImagemDeJogo("docs/images/y.png"))
         assertTrue(FiltroRepo.ehImagemDeJogo("media/loop.gif"))
     }
 
@@ -17,6 +18,16 @@ class FiltroRepoTest {
         assertFalse(FiltroRepo.ehImagemDeJogo("src/main/java/a.png"))
         assertFalse(FiltroRepo.ehImagemDeJogo("docs/a.svg"))
         assertFalse(FiltroRepo.ehImagemDeJogo("docs/notas.txt"))
+    }
+
+    @Test fun `pasta assets sozinha nao conta (arte que nao e jogo)`() {
+        assertFalse(FiltroRepo.ehImagemDeJogo("assets/pokewalker/course_beach.jpg"))
+        assertFalse(FiltroRepo.ehImagemDeJogo("assets/android-dual-screen/main-menu-primary.png"))
+    }
+
+    @Test fun `tela secondary fica de fora`() {
+        assertFalse(FiltroRepo.ehImagemDeJogo("docs/assets/android-dual-screen/slot-select-secondary.png"))
+        assertFalse(FiltroRepo.ehImagemDeJogo("screenshots/stats-secondary.png"))
     }
 
     @Test fun `icone, logo, recurso de android e fonte ficam de fora`() {
@@ -29,7 +40,6 @@ class FiltroRepoTest {
         assertFalse(FiltroRepo.ehImagemDeJogo("docs/ui/menu.png"))
         assertFalse(FiltroRepo.ehImagemDeJogo("docs/sprite.png"))
         assertFalse(FiltroRepo.ehImagemDeJogo("docs/badge.png"))
-        assertFalse(FiltroRepo.ehImagemDeJogo("docs/tela-secondary.png"))
     }
 
     @Test fun `endereco cru codifica cada parte do caminho`() {
@@ -37,5 +47,11 @@ class FiltroRepoTest {
             "https://raw.githubusercontent.com/dono/repo/main/docs/Tela%201%20%28a%29.png",
             FiltroRepo.urlRaw("dono/repo", "main", "docs/Tela 1 (a).png"),
         )
+    }
+
+    @Test fun `imagem da documentacao de biblioteca embutida fica de fora`() {
+        assertFalse(FiltroRepo.ehImagemDeJogo("mobile/android/love/src/jni/LuaJIT-2.1/doc/img/contact.png"))
+        assertFalse(FiltroRepo.ehImagemDeJogo("vendor/sdl/docs/images/logo.png"))
+        assertTrue(FiltroRepo.ehImagemDeJogo("docs/images/gameplay-1.png"))
     }
 }
