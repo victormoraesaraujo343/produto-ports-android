@@ -25,6 +25,14 @@ data class Port(
     val estadoDeExemplo: Estado? = null,
     val progressoDeExemplo: Int? = null,
     val jogadoHa: String? = null,
+    /** Capa e fundo vindos do catálogo online (ou do SteamGridDB, depois). */
+    val capaUrl: String? = null,
+    val heroUrl: String? = null,
+    /** Regex do APK no GitHub (`assets.android.pattern`). */
+    val padraoApk: String? = null,
+    /** Canal das releases: `latest` ou `prerelease`. */
+    val canal: String = "latest",
+    val estrelas: Int? = null,
 )
 
 /** O que se lista na tela: o port e o estado já calculado. */
