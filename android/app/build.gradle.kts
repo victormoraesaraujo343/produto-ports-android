@@ -12,12 +12,16 @@ android {
         applicationId = "app.ports.launcher"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0-esqueleto"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     buildTypes {
-        release { isMinifyEnabled = false }
+        release {
+            isMinifyEnabled = false
+            // por enquanto, assinado com a chave de debug: quem já tem o app de teste atualiza sem desinstalar
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 
     compileOptions {
