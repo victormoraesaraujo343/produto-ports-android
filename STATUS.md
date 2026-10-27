@@ -4,7 +4,7 @@
 
 ## Onde estamos
 
-Esqueleto do app (issue #1) compilando: Início, Ports e Detalhes deitados, com foco por controle e um catálogo de exemplo. Selo: `AUTOMATED VERIFIED` (`:core:test` com 8 testes e `:app:assembleDebug` passando). Falta `TESTADO NO APARELHO`: instalar e navegar no AYN Odin.
+Esqueleto do app (issue #1) pronto e `TESTADO NO APARELHO` no AYN Odin 2 (Android 13, 1920×1080, 960×540 dp), em 2026-10-27. Funcionam: tela cheia, foco inicial, direcional, A, B, Y e L1/R1 entre Início, Ports e Detalhes. As capturas estão em `docs/aparelho/`. A conexão USB com o Odin cai com erro de protocolo; a depuração por Wi‑Fi funciona.
 
 ## O que existe
 
@@ -15,9 +15,8 @@ Esqueleto do app (issue #1) compilando: Início, Ports e Detalhes deitados, com 
 
 ## Esperando o Victor
 
-- Conectar o AYN Odin por `adb` pro teste do esqueleto.
 - Conferir as escolhas da IA Q-a a Q-d e a stack D-005 (`DECISIONS.md`).
 
 ## Próximo
 
-Testar a issue #1 no Odin. Depois: Opções (☰), versão em pé, e o catálogo de verdade (roadmap 4) com o pacote Android de cada port.
+Próximas issues (feitas por agentes Haiku, validadas pelo Opus): Opções (☰), versão em pé, e o catálogo de verdade (roadmap 4) com o pacote Android de cada port.

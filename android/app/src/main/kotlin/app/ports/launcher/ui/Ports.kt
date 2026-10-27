@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,7 +73,7 @@ fun Ports(
                         .height(32.dp)
                         .clip(RoundedCornerShape(Raio))
                         .then(if (sel) Modifier.background(Cor.claro) else Modifier.border(1.dp, Cor.borda, RoundedCornerShape(Raio)))
-                        .clickable { filtro = f }
+                        .acionavel { filtro = f }
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -108,7 +107,7 @@ fun Ports(
                         .aspectRatio(3f / 4f)
                         .shadow(8.dp, RoundedCornerShape(6.dp))
                         .clip(RoundedCornerShape(6.dp))
-                        .clickable { aoAcao(pt) },
+                        .acionavel { aoAcao(pt) },
                 ) {
                     Arte(pt.port, Modifier.fillMaxSize())
                     Selo(pt, Modifier.align(Alignment.BottomEnd).padding(6.dp))
@@ -116,7 +115,7 @@ fun Ports(
                 }
             }
         }
-        LaunchedEffect(filtro) { runCatching { primeiro.requestFocus() } }
+        LaunchedEffect(filtro) { primeiro.focarQuandoPuder() }
 
         // faixa de contexto: o port em foco
         if (entrada != Entrada.TOQUE) Row(

@@ -2,7 +2,6 @@ package app.ports.launcher.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,10 +79,10 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit)
                             .onFocusChanged { temFoco = it.isFocused }
                             .contornoFoco(temFoco, raio = Raio, entrada = entrada)
                             .clip(RoundedCornerShape(Raio))
-                            .clickable { aoAcao(pt) },
-                    ) { BotaoHydra(acao, pt.estado != Estado.NAO_RODA, Botao.A, aoClicar = { aoAcao(pt) }) }
+                            .acionavel { aoAcao(pt) },
+                    ) { BotaoHydra(acao, pt.estado != Estado.NAO_RODA, Botao.A, aoClicar = { aoAcao(pt) }) } // o toque cai no botão; A/Enter, no Box
                 }
-                LaunchedEffect(Unit) { runCatching { principal.requestFocus() } }
+                LaunchedEffect(Unit) { principal.focarQuandoPuder() }
 
                 Texto("O QUE O PORT PRECISA", Tipo.rotulo, Modifier.padding(top = 14.dp, bottom = 4.dp))
                 Precisa(pt)
@@ -152,7 +151,7 @@ private fun Bloco(titulo: String, entrada: Entrada, conteudo: @Composable () -> 
             .clip(RoundedCornerShape(Raio))
             .background(Color(0xB80D0D0D))
             .border(1.dp, Cor.borda, RoundedCornerShape(Raio))
-            .clickable { }
+            .acionavel { }
             .padding(horizontal = 14.dp, vertical = 12.dp),
     ) {
         Texto(titulo, Tipo.rotulo, Modifier.padding(bottom = 4.dp))

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -129,7 +128,7 @@ fun Inicio(
                         .size(132.dp, 74.dp)
                         .shadow(8.dp, RoundedCornerShape(6.dp))
                         .clip(RoundedCornerShape(6.dp))
-                        .clickable { aoAcao(pt) }, // clickable já é focável pelo direcional
+                        .acionavel { aoAcao(pt) }
                 ) {
                     Arte(pt.port, Modifier.fillMaxSize(), tamanhoNome = 12.sp)
                     if (temFoco || entrada == Entrada.TOQUE) {
@@ -148,7 +147,7 @@ fun Inicio(
                         .contornoFoco(temFoco, entrada = entrada)
                         .size(132.dp, 74.dp)
                         .border(1.dp, Cor.bordaForte, RoundedCornerShape(6.dp))
-                        .clickable { aoTodos() },
+                        .acionavel { aoTodos() },
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -159,7 +158,7 @@ fun Inicio(
                 }
             }
         }
-        LaunchedEffect(Unit) { runCatching { primeiro.requestFocus() } }
+        LaunchedEffect(Unit) { primeiro.focarQuandoPuder() }
 
         val pt = focado
         Dicas(

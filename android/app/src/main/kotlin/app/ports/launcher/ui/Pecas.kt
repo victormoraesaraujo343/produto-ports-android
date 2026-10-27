@@ -2,6 +2,8 @@ package app.ports.launcher.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -27,7 +29,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -43,6 +53,7 @@ import app.ports.core.Estado
 import app.ports.core.Port
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
+import kotlinx.coroutines.delay
 
 /* ------------------------------------------------------------ arte
    Sem imagem no esqueleto: gradiente com a cor do jogo e o nome desenhado,
@@ -51,10 +62,10 @@ import app.ports.core.Textos
 fun Arte(p: Port, modifier: Modifier = Modifier, comNome: Boolean = true, tamanhoNome: TextUnit = 13.sp) {
     val c = p.cores
     Box(
-        modifier.background(
-            if (c != null) Brush.radialGradient(listOf(Color(c[0]), Color(c[1]), Color(c[2])), center = Offset(0.72f * 400, 0.32f * 300), radius = 520f)
-            else Brush.linearGradient(listOf(Color(0xFF1B1B1B), Color(0xFF1B1B1B))),
-        ),
+        // gradiente relativo ao tamanho (com pixels fixos o centro ia pro canto)
+        if (c != null) modifier.drawBehind {
+            drawRect(Brush.radialGradient(listOf(Color(c[0]), Color(c[1]), Color(c[2])), center = Offset(size.width * 0.72f, size.height * 0.32f), radius = size.maxDimension * 0.62f))
+        } else modifier.background(Color(0xFF1B1B1B)),
         contentAlignment = Alignment.Center,
     ) {
         if (comNome) BasicText(
@@ -119,7 +130,7 @@ fun Glifo(b: Botao, claro: Boolean = true) {
     Box(
         Modifier.height(if (ombro) 18.dp else 20.dp).widthIn(min = 20.dp)
             .clip(if (ombro) RoundedCornerShape(5.dp) else CircleShape)
-            .background(if (ombro) Color(0xFF3A3A3A) else if (claro) Cor.claro else Color(0xFF121212))
+            .background(if (ombro) Color(0xFF3A3A3A) else if (claro) Cor.claro else Color(0xFF2D2D2D))
             .padding(horizontal = if (ombro) 6.dp else 0.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -158,8 +169,6 @@ fun Topo(atual: Secao, aoIr: (Secao) -> Unit) {
             }
         }
         Glifo(Botao.R1)
-        Box(Modifier.weight(1f))
-        BasicText("9:41", style = Tipo.dica.copy(fontSize = 12.sp))
     }
 }
 
@@ -192,4 +201,20 @@ fun Fundo(conteudo: @Composable BoxScope.() -> Unit) = Box(Modifier.fillMaxSize(
 fun Modifier.clickableSemFoco(aoClicar: () -> Unit): Modifier = composed {
     this.focusProperties { canFocus = false }
         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = aoClicar)
+}
+
+/** Focável sempre (com controle, também em "modo toque") e acionado por A/Enter/centro do direcional ou toque. */
+fun Modifier.acionavel(aoAcionar: () -> Unit): Modifier = this
+    .onKeyEvent { e ->
+        if (e.type == KeyEventType.KeyUp && (e.key == Key.DirectionCenter || e.key == Key.Enter || e.key == Key.NumPadEnter || e.key == Key.ButtonA)) { aoAcionar(); true } else false
+    }
+    .focusable()
+    .pointerInput(aoAcionar) { detectTapGestures { aoAcionar() } }
+
+/** Pede foco quando o item já existe na tela (itens de listas preguiçosas aparecem um quadro depois). */
+suspend fun FocusRequester.focarQuandoPuder() {
+    repeat(30) {
+        if (runCatching { requestFocus() }.getOrDefault(false)) return
+        delay(16)
+    }
 }
