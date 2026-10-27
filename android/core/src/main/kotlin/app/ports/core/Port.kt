@@ -38,6 +38,13 @@ data class Port(
 /** O que se lista na tela: o port e o estado já calculado. */
 data class PortNaTela(val port: Port, val estado: Estado, val versaoInstalada: String?, val progresso: Int? = null)
 
+/** Ports de VR (Meta Quest) não rodam num portátil: ficam de fora de todas as listas. */
+object Vr {
+    private val marca = Regex("""\b(VR|Meta Quest|Quest \d)\b""", RegexOption.IGNORE_CASE)
+
+    fun ehVr(titulo: String): Boolean = marca.containsMatchIn(titulo)
+}
+
 object Ordem {
     /** A–Z estável (Síntese §2 do Roseta). */
     val alfabetica: Comparator<PortNaTela> = compareBy(java.text.Collator.getInstance(java.util.Locale("pt", "BR"))) { it.port.titulo }

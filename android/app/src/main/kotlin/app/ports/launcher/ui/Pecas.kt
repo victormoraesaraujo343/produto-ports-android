@@ -1,5 +1,12 @@
 package app.ports.launcher.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -8,7 +15,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.foundation.border
@@ -31,7 +44,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -41,6 +60,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,14 +73,35 @@ import app.ports.core.Estado
 import app.ports.core.Port
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
+import app.ports.launcher.dados.EstadoCatalogo
+import app.ports.launcher.dados.Repositorio
 import kotlinx.coroutines.delay
 
+/** O repositório (capas, imagens, detalhes) pra qualquer peça da tela. */
+val LocalRepositorio = compositionLocalOf<Repositorio> { error("Repositorio não entregue à tela") }
+
+/** Pede a capa de um port (uma vez por id; a MainActivity faz a conta). */
+val LocalPedirCapa = compositionLocalOf<(String) -> Unit> { {} }
+
 /* ------------------------------------------------------------ arte
-   Sem imagem no esqueleto: gradiente com a cor do jogo e o nome desenhado,
-   como no lab. Port sem arte mostra as iniciais (P-08). */
+   Gradiente com a cor do jogo e o nome desenhado (como no lab). Com `url`, a
+   imagem entra por cima quando chega; enquanto não chega, ou se falhar, fica
+   o gradiente com o nome. Port sem arte mostra as iniciais (P-08). */
 @Composable
-fun Arte(p: Port, modifier: Modifier = Modifier, comNome: Boolean = true, tamanhoNome: TextUnit = 13.sp) {
+fun Arte(
+    p: Port,
+    modifier: Modifier = Modifier,
+    comNome: Boolean = true,
+    tamanhoNome: TextUnit = 13.sp,
+    url: String? = null,
+    larguraMax: Int = 400,
+) {
     val c = p.cores
+    val repositorio = LocalRepositorio.current
+    val imagem by produceState<ImageBitmap?>(null, url, larguraMax) {
+        value = url?.let { repositorio.imagens.carregar(it, larguraMax) }
+    }
+    val img = imagem
     Box(
         // gradiente relativo ao tamanho (com pixels fixos o centro ia pro canto)
         if (c != null) modifier.drawBehind {
@@ -68,7 +109,9 @@ fun Arte(p: Port, modifier: Modifier = Modifier, comNome: Boolean = true, tamanh
         } else modifier.background(Color(0xFF1B1B1B)),
         contentAlignment = Alignment.Center,
     ) {
-        if (comNome) BasicText(
+        if (img != null) {
+            Image(img, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        } else if (comNome) BasicText(
             if (c != null) p.logo else iniciais(p.titulo),
             Modifier.padding(10.dp),
             style = TextStyle(
@@ -114,6 +157,44 @@ fun Barra(progresso: Int, modifier: Modifier = Modifier) {
     }
 }
 
+/** Espera sem texto: um arco girando, pequeno, no centro da tela. */
+@Composable
+fun Espera() {
+    val giro by rememberInfiniteTransition(label = "espera").animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(900, easing = LinearEasing)),
+        label = "giro",
+    )
+    Canvas(Modifier.size(28.dp)) {
+        val e = 3.dp.toPx()
+        val area = Size(size.width - e, size.height - e)
+        val canto = Offset(e / 2, e / 2)
+        drawArc(color = Cor.claro.copy(alpha = 0.18f), startAngle = 0f, sweepAngle = 360f, useCenter = false, topLeft = canto, size = area, style = Stroke(e))
+        drawArc(color = Cor.claro, startAngle = giro, sweepAngle = 100f, useCenter = false, topLeft = canto, size = area, style = Stroke(e, cap = StrokeCap.Round))
+    }
+}
+
+/** Tela sem lista ainda: espera (sem texto) ou, sem conexão e sem cache, um erro curto com "Tentar de novo". */
+@Composable
+fun TelaSemLista(secao: Secao?, estado: EstadoCatalogo, aoSecao: (Secao) -> Unit, aoTentar: () -> Unit) {
+    val foco = remember { FocusRequester() }
+    Fundo {
+        if (secao != null) Topo(secao, aoSecao)
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (estado is EstadoCatalogo.Erro) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Texto("Sem conexão.", Tipo.corpo.copy(fontSize = 16.sp, color = Cor.claro))
+                    BotaoFocavel("Tentar de novo", primario = true, botao = Botao.A, focoRef = foco, aoAcionar = aoTentar)
+                }
+                LaunchedEffect(Unit) { foco.focarQuandoPuder() }
+            } else {
+                Espera()
+            }
+        }
+    }
+}
+
 /* ------------------------------------------------------------ botões do controle (P-23) */
 enum class Botao { A, B, X, Y, L1, R1, MENU }
 
@@ -152,6 +233,22 @@ fun BotaoHydra(texto: String, primario: Boolean, botao: Botao?, modifier: Modifi
         if (botao != null) Glifo(botao, claro = !primario)
         BasicText(texto, style = Tipo.botao.copy(color = if (primario) Color(0xFF121212) else Cor.claro))
     }
+}
+
+/** Botão do Hydra que recebe foco (contorno claro) e age com A/Enter, ou com o toque. */
+@Composable
+fun BotaoFocavel(texto: String, primario: Boolean, botao: Botao?, focoRef: FocusRequester? = null, aoAcionar: () -> Unit) {
+    var temFoco by remember { mutableStateOf(false) }
+    val entrada = LocalEntrada.current.atual
+    Box(
+        Modifier
+            .then(if (focoRef != null) Modifier.focusRequester(focoRef) else Modifier)
+            .onFocusChanged { temFoco = it.isFocused }
+            .contornoFoco(temFoco, raio = Raio, entrada = entrada)
+            .clip(RoundedCornerShape(Raio))
+            .acionavelPorTecla(aoAcionar)
+            .focusable(),
+    ) { BotaoHydra(texto, primario, botao, aoClicar = aoAcionar) }
 }
 
 /* ------------------------------------------------------------ topo: seções com L1/R1 */
@@ -203,11 +300,15 @@ fun Modifier.clickableSemFoco(aoClicar: () -> Unit): Modifier = composed {
         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = aoClicar)
 }
 
-/** Focável sempre (com controle, também em "modo toque") e acionado por A/Enter/centro do direcional ou toque. */
-fun Modifier.acionavel(aoAcionar: () -> Unit): Modifier = this
+/** Aciona com A/Enter/centro do direcional. Não torna o item focável nem trata toque. */
+fun Modifier.acionavelPorTecla(aoAcionar: () -> Unit): Modifier = this
     .onKeyEvent { e ->
         if (e.type == KeyEventType.KeyUp && (e.key == Key.DirectionCenter || e.key == Key.Enter || e.key == Key.NumPadEnter || e.key == Key.ButtonA)) { aoAcionar(); true } else false
     }
+
+/** Focável sempre (com controle, também em "modo toque") e acionado por A/Enter/centro do direcional ou toque. */
+fun Modifier.acionavel(aoAcionar: () -> Unit): Modifier = this
+    .acionavelPorTecla(aoAcionar)
     .focusable()
     .pointerInput(aoAcionar) { detectTapGestures { aoAcionar() } }
 

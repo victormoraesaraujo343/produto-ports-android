@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -35,22 +34,28 @@ import androidx.compose.ui.unit.sp
 import app.ports.core.Estado
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
+import app.ports.core.Titulo
 import app.ports.core.Tom
 
 /**
  * DETALHES — deitado. O estado que a capa resume vira a lista do que o port
  * precisa, sempre visível (aprovado na R1). A ação principal fica no mesmo
- * lugar e muda as palavras (P-26).
+ * lugar e muda as palavras (P-26). Só aqui aparecem versão, tamanho e projeto (D-007).
  */
 @Composable
-fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit) {
+fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaTela) -> Unit, aoVoltar: () -> Unit) {
     val p = pt.port
-    val t = Textos.de(pt.estado)
-    val acao = if (pt.estado == Estado.NAO_RODA) "Instalar mesmo assim" else t.acao
+    val repositorio = LocalRepositorio.current
+    val acao = if (pt.estado == Estado.NAO_RODA) "Instalar mesmo assim" else Textos.de(pt.estado).acao
     val entrada = LocalEntrada.current.atual
+    // a release (versão, tamanho) e as capas chegam aqui, depois que a tela abre
+    LaunchedEffect(p.id) {
+        repositorio.detalhar(p.id)
+        repositorio.capas(p.id)
+    }
 
     Fundo {
-        Arte(p, Modifier.fillMaxSize().padding(start = 270.dp), comNome = false)
+        Arte(p, Modifier.fillMaxSize().padding(start = 270.dp), comNome = false, url = p.heroUrl ?: p.capaUrl, larguraMax = 960)
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.34f to Cor.fundo, 0.52f to Color(0xD1121212), 0.75f to Color(0x73121212), 1f to Color(0xB3121212))))
 
         // ‹ só no toque; com controle, B volta (dica embaixo)
@@ -61,19 +66,14 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit)
         Row(Modifier.fillMaxSize().padding(top = 50.dp)) {
             // coluna da ação
             Column(Modifier.padding(start = 32.dp).width(400.dp)) {
-                Texto(p.logo, Tipo.logo.copy(fontSize = 28.sp))
-                Texto("${p.nomePort} · ${p.plataforma}", Tipo.corpo.copy(fontSize = 13.sp, color = Color(0xFFE6E7EC)), Modifier.padding(top = 4.dp))
+                Texto(Titulo.semParenteses(p.titulo), Tipo.logo.copy(fontSize = 28.sp))
+                val plataforma = plataformaMostrada(p.plataforma)
+                Texto(listOfNotNull(p.nomePort, plataforma).joinToString(" · "), Tipo.corpo.copy(fontSize = 13.sp, color = Color(0xFFE6E7EC)), Modifier.padding(top = 4.dp))
                 Box(Modifier.padding(top = 8.dp)) { LinhaEstado(pt) }
                 val principal = remember { FocusRequester() }
-                Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    var temFoco by remember { mutableStateOf(false) }
-                    Box(
-                        Modifier.focusRequester(principal)
-                            .onFocusChanged { temFoco = it.isFocused }
-                            .contornoFoco(temFoco, raio = Raio, entrada = entrada)
-                            .clip(RoundedCornerShape(Raio))
-                            .acionavel { aoAcao(pt) },
-                    ) { BotaoHydra(acao, pt.estado != Estado.NAO_RODA, Botao.A, aoClicar = { aoAcao(pt) }) } // o toque cai no botão; A/Enter, no Box
+                Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    BotaoFocavel(acao, primario = pt.estado != Estado.NAO_RODA, botao = Botao.A, focoRef = principal, aoAcionar = { aoAcao(pt) })
+                    if (pt.estado == Estado.ATUALIZAR) BotaoFocavel("Atualizar", primario = false, botao = null, aoAcionar = { aoAtualizar(pt) })
                 }
                 LaunchedEffect(Unit) { principal.focarQuandoPuder() }
 
@@ -82,11 +82,11 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit)
             }
             // coluna de informação: blocos focáveis pra rolar com o direcional
             Column(Modifier.weight(1f).fillMaxHeight().padding(start = 40.dp, end = 30.dp, bottom = 40.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Bloco("SOBRE", entrada) { Texto(p.descricao, Tipo.corpo.copy(fontSize = 13.5.sp, lineHeight = 20.sp)) }
+                if (p.descricao.isNotBlank()) Bloco("SOBRE", entrada) { Texto(p.descricao, Tipo.corpo.copy(fontSize = 13.5.sp, lineHeight = 20.sp)) }
                 Bloco("FICHA", entrada) {
-                    Ficha("Tipo", p.tipo.replaceFirstChar { it.uppercase() })
-                    Ficha("Versão", pt.versaoInstalada ?: "não instalado")
-                    Ficha("Tamanho", p.tamanho)
+                    if (p.tipo.isNotBlank()) Ficha("Tipo", p.tipo.replaceFirstChar { it.uppercase() })
+                    Ficha("Versão", pt.versaoInstalada ?: p.versaoMaisNova ?: "—")
+                    if (p.tamanho.isNotBlank()) Ficha("Tamanho", p.tamanho)
                     Ficha("Projeto", p.repo)
                 }
             }
@@ -95,25 +95,23 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoVoltar: () -> Unit)
     }
 }
 
+/** Nome da plataforma pra mostrar, ou nulo quando o catálogo não sabe (`other`). */
+private fun plataformaMostrada(plataforma: String): String? =
+    plataforma.takeIf { it.isNotBlank() && !it.equals("other", ignoreCase = true) && !it.equals("unknown", ignoreCase = true) }
+
+/** Só fatos que o app sabe de verdade: instalado, versão nova, roda aqui. */
 @Composable
 private fun Precisa(pt: PortNaTela) {
     val p = pt.port
-    val instalado = pt.estado !in setOf(Estado.DISPONIVEL, Estado.NAO_RODA)
+    val versao = pt.versaoInstalada
     val itens = buildList {
-        if (pt.estado == Estado.NAO_RODA) {
-            add(Triple(Tom.RUIM, "Não roda neste aparelho", p.motivoNaoRoda ?: ""))
-            add(Triple(Tom.NEUTRO, "Port não instalado", "${p.tamanho} pra baixar"))
-        } else {
-            add(if (instalado) Triple(Tom.OK, "Port instalado", "versão ${pt.versaoInstalada ?: "?"}") else Triple(Tom.NEUTRO, "Port não instalado", "${p.tamanho} pra baixar do GitHub"))
-            when (pt.estado) {
-                Estado.ATUALIZAR -> add(Triple(Tom.DOWNLOAD, "Versão nova: ${p.versaoMaisNova}", "Dá pra jogar agora e atualizar depois"))
-                Estado.BAIXANDO -> add(Triple(Tom.DOWNLOAD, "Baixando a versão nova · ${pt.progresso ?: 0}%", "Dá pra jogar a versão atual enquanto isso"))
-                else -> if (instalado) add(Triple(Tom.OK, "Na versão mais nova", ""))
-            }
-            if (pt.estado == Estado.FALTA_ARQUIVO || pt.estado == Estado.ARQUIVO_ERRADO || !instalado) add(Triple(Tom.AVISO, "Falta o arquivo do jogo", "Serve: ${p.arquivoQueServe}"))
-            else add(Triple(Tom.OK, "Arquivo do jogo conferido", p.arquivoQueServe))
-            add(Triple(Tom.OK, "Roda neste aparelho", "Pelo que o catálogo pede"))
+        add(if (versao != null) Triple(Tom.OK, "Port instalado", "") else Triple(Tom.NEUTRO, "Port não instalado", ""))
+        val nova = p.versaoMaisNova
+        if (versao != null && nova != null) {
+            add(if (nova == versao) Triple(Tom.OK, "Na versão mais nova", "") else Triple(Tom.DOWNLOAD, "Versão nova: $nova", ""))
         }
+        if (pt.estado == Estado.NAO_RODA) add(Triple(Tom.RUIM, "Não roda neste aparelho", p.motivoNaoRoda ?: ""))
+        else add(Triple(Tom.OK, "Roda neste aparelho", ""))
     }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         itens.forEach { (tom, titulo, detalhe) ->

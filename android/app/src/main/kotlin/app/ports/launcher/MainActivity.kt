@@ -11,36 +11,41 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
 import app.ports.core.Estado
 import app.ports.core.PortNaTela
-import app.ports.launcher.dados.Catalogo
-import app.ports.launcher.ui.Cor
+import app.ports.core.Textos
+import app.ports.core.Titulo
+import app.ports.core.Vr
+import app.ports.launcher.dados.EstadoCatalogo
+import app.ports.launcher.dados.Repositorio
+import app.ports.launcher.dados.ResultadoInstalacao
+import app.ports.launcher.ui.Ajustes
 import app.ports.launcher.ui.Detalhes
 import app.ports.launcher.ui.Entrada
 import app.ports.launcher.ui.EstadoEntrada
-import app.ports.launcher.ui.Fundo
 import app.ports.launcher.ui.Inicio
 import app.ports.launcher.ui.LocalEntrada
+import app.ports.launcher.ui.LocalPedirCapa
+import app.ports.launcher.ui.LocalRepositorio
 import app.ports.launcher.ui.Ports
 import app.ports.launcher.ui.Secao
-import app.ports.launcher.ui.Texto
-import app.ports.launcher.ui.Tipo
-import app.ports.launcher.ui.Topo
+import app.ports.launcher.ui.TelaSemLista
+import kotlinx.coroutines.launch
 
 /** Pra onde se navega. A pilha só cresce em telas de dentro (Detalhes). */
 sealed interface Tela {
@@ -51,6 +56,13 @@ sealed interface Tela {
 class MainActivity : ComponentActivity() {
     private val entrada = EstadoEntrada()
     private val atalhos = Atalhos()
+    private lateinit var repositorio: Repositorio
+
+    /** Ports cuja capa já foi pedida nesta sessão (limpa quando a chave muda). */
+    private val capasPedidas = HashSet<String>()
+
+    /** Sobe a cada volta ao app: um jogo aberto pode ter mudado a fileira de recentes. */
+    private var voltas by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,29 +73,36 @@ class MainActivity : ComponentActivity() {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
         window.attributes = window.attributes.also { it.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES }
-        val catalogo = Catalogo(this)
+        repositorio = Repositorio.obter(applicationContext)
 
         setContent {
-            CompositionLocalProvider(LocalEntrada provides entrada) {
+            CompositionLocalProvider(
+                LocalEntrada provides entrada,
+                LocalRepositorio provides repositorio,
+                LocalPedirCapa provides pedirCapaAoAparecer,
+            ) {
+                val estado by repositorio.estado.collectAsState()
                 val pilha = remember { mutableStateListOf<Tela>(Tela.DeSecao(Secao.INICIO)) }
-                var focado by remember { mutableStateOf<PortNaTela?>(null) }
+                var focadoId by remember { mutableStateOf<String?>(null) }
                 val tela = pilha.last()
 
-                fun irSecao(s: Secao) { pilha.clear(); pilha.add(Tela.DeSecao(s)); focado = null }
-                fun detalhes(pt: PortNaTela) = pilha.add(Tela.DeDetalhes(pt.port.id))
-                fun acao(pt: PortNaTela) {
-                    when (pt.estado) {
-                        Estado.PRONTO, Estado.ATUALIZAR, Estado.BAIXANDO ->
-                            if (!catalogo.abrir(pt.port)) aviso("Abrir ${pt.port.titulo}: o catálogo de exemplo ainda não tem o pacote Android desse port.")
-                        Estado.NAO_RODA -> detalhes(pt)
-                        else -> aviso("“${app.ports.core.Textos.de(pt.estado).acao}” ainda não está no app. Vem nas próximas issues.")
-                    }
-                }
+                LaunchedEffect(Unit) { repositorio.atualizar() }
+                LaunchedEffect(Unit) { repositorio.avisos.collect { aviso(it) } }
+
+                val pronto = estado as? EstadoCatalogo.Pronto
+                // um único filtro: ports de VR saem de todas as listas
+                val visiveis = remember(pronto) { pronto?.ports.orEmpty().filter { !Vr.ehVr(it.port.titulo) } }
+                val recentes = remember(visiveis, voltas) { repositorio.recentes().filter { !Vr.ehVr(it.port.titulo) } }
+                // sem recentes, a fileira mostra os mais estrelados
+                val fileira = if (recentes.isNotEmpty()) recentes else visiveis.sortedByDescending { it.port.estrelas ?: -1 }.take(8)
+
+                fun irSecao(s: Secao) { pilha.clear(); pilha.add(Tela.DeSecao(s)); focadoId = null }
+                fun detalhes(id: String) { pilha.add(Tela.DeDetalhes(id)) }
 
                 // L1/R1 trocam de seção; Y abre detalhes do jogo em foco
                 atalhos.l1 = { (tela as? Tela.DeSecao)?.let { irSecao(Secao.entries[(it.secao.ordinal + 2) % 3]) } }
                 atalhos.r1 = { (tela as? Tela.DeSecao)?.let { irSecao(Secao.entries[(it.secao.ordinal + 1) % 3]) } }
-                atalhos.y = { if (tela is Tela.DeSecao) focado?.let(::detalhes) }
+                atalhos.y = { if (tela is Tela.DeSecao) focadoId?.let { detalhes(it) } }
 
                 BackHandler(enabled = pilha.size > 1 || tela != Tela.DeSecao(Secao.INICIO)) {
                     if (pilha.size > 1) pilha.removeAt(pilha.lastIndex) else irSecao(Secao.INICIO)
@@ -92,21 +111,33 @@ class MainActivity : ComponentActivity() {
                 Box(Modifier.fillMaxSize()) {
                     when (tela) {
                         is Tela.DeSecao -> when (tela.secao) {
-                            Secao.INICIO -> Inicio(
-                                recentes = catalogo.recentes(), total = catalogo.ports.size, focoInicial = focado?.port?.id,
-                                aoFocar = { focado = it }, aoAcao = ::acao, aoDetalhes = ::detalhes,
-                                aoTodos = { irSecao(Secao.PORTS) }, aoSecao = ::irSecao,
+                            Secao.INICIO ->
+                                if (pronto == null) TelaSemLista(Secao.INICIO, estado, { irSecao(it) }, { atualizarLista() })
+                                else Inicio(
+                                    itens = fileira, focoInicial = focadoId,
+                                    aoFocar = { focadoId = it?.port?.id }, aoAcao = { acao(it) }, aoDetalhes = { detalhes(it.port.id) },
+                                    aoTodos = { irSecao(Secao.PORTS) }, aoSecao = { irSecao(it) },
+                                )
+                            Secao.PORTS ->
+                                if (pronto == null) TelaSemLista(Secao.PORTS, estado, { irSecao(it) }, { atualizarLista() })
+                                else Ports(visiveis, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { acao(it) }, aoSecao = { irSecao(it) })
+                            Secao.AJUSTES -> Ajustes(
+                                atualizadoEm = pronto?.atualizadoEm,
+                                aoSecao = { irSecao(it) },
+                                aoChaveMudou = { capasPedidas.clear() },
+                                aoAtualizarLista = { atualizarLista() },
                             )
-                            Secao.PORTS -> Ports(catalogo.naTela(), focado?.port?.id, aoFocar = { focado = it }, aoAcao = ::acao, aoSecao = ::irSecao)
-                            Secao.AJUSTES -> Fundo {
-                                Topo(Secao.AJUSTES, ::irSecao)
-                                Column(Modifier.align(Alignment.Center).padding(24.dp)) {
-                                    Texto("Ajustes chegam numa próxima issue.", Tipo.corpo.copy(color = Cor.claro))
-                                    Texto("O desenho está no lab: laboratorio/ajustes.", Tipo.dica)
-                                }
-                            }
                         }
-                        is Tela.DeDetalhes -> catalogo.porId(tela.id)?.let { Detalhes(it, aoAcao = ::acao, aoVoltar = { onBackPressedDispatcher.onBackPressed() }) }
+                        is Tela.DeDetalhes -> {
+                            val p = visiveis.find { it.port.id == tela.id }
+                            if (p != null) Detalhes(
+                                p,
+                                aoAcao = { acao(p) },
+                                aoAtualizar = { instalar(p.port.id) },
+                                aoVoltar = { onBackPressedDispatcher.onBackPressed() },
+                            )
+                            else TelaSemLista(null, estado, { irSecao(it) }, { atualizarLista() })
+                        }
                     }
                 }
             }
@@ -119,7 +150,55 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) WindowCompat.getInsetsController(window, window.decorView).hide(WindowInsetsCompat.Type.systemBars())
     }
 
+    override fun onResume() {
+        super.onResume()
+        voltas++
+    }
+
     private fun aviso(t: String) = Toast.makeText(this, t, Toast.LENGTH_LONG).show()
+
+    /** Estado do port agora, não o da tela (que pode estar um quadro atrás). */
+    private fun atual(id: String): PortNaTela? =
+        (repositorio.estado.value as? EstadoCatalogo.Pronto)?.ports?.find { it.port.id == id }
+
+    /** A ação principal: abre o que está instalado, instala o que não está. */
+    private fun acao(pt: PortNaTela) {
+        val p = atual(pt.port.id) ?: pt
+        when (p.estado) {
+            Estado.PRONTO, Estado.ATUALIZAR -> abrir(p)
+            // baixando sem nada instalado não tem o que abrir: o progresso aparece na capa
+            Estado.BAIXANDO -> if (p.versaoInstalada != null) abrir(p)
+            Estado.DISPONIVEL, Estado.NAO_RODA -> instalar(p.port.id)
+            else -> aviso("“${Textos.de(p.estado).acao}” ainda não está no app.")
+        }
+    }
+
+    private fun abrir(p: PortNaTela) {
+        if (!repositorio.abrir(p.port.id)) aviso("Não deu pra abrir ${Titulo.semParenteses(p.port.titulo)}.")
+    }
+
+    /** Baixa e entrega ao instalador do sistema. O resultado final chega pelo receptor. */
+    private fun instalar(id: String) {
+        lifecycleScope.launch {
+            when (val r = repositorio.instalar(id)) {
+                is ResultadoInstalacao.PrecisaPermissao -> {
+                    startActivity(r.intent)
+                    aviso("Libere a instalação de apps e tente de novo.")
+                }
+                is ResultadoInstalacao.Falhou -> aviso(r.mensagem)
+                ResultadoInstalacao.Iniciado -> Unit
+            }
+        }
+    }
+
+    private fun atualizarLista() {
+        lifecycleScope.launch { repositorio.atualizar(forcar = true) }
+    }
+
+    /** Cada capa é pedida uma vez: a fileira e a grade chamam isto ao aparecer. Uma instância só, pra não repintar à toa. */
+    private val pedirCapaAoAparecer: (String) -> Unit = { id ->
+        if (capasPedidas.add(id)) lifecycleScope.launch { repositorio.capas(id) }
+    }
 
     /* ------------------------------------------------------------ controle
        A vira "confirmar" (o acionavel do Compose escuta DPAD_CENTER/Enter), B é

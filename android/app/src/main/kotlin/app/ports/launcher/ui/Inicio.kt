@@ -44,16 +44,16 @@ import androidx.compose.ui.unit.sp
 import app.ports.core.Estado
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
+import app.ports.core.Titulo
 
 /**
  * INÍCIO — deitado. O jogo em foco é o fundo da tela (aprovado na R1); a
- * fileira é atalho pros recentes; pra baixo abre a lista completa (Q-c). A
- * joga, Y abre os detalhes.
+ * fileira é atalho pros recentes (ou, sem recentes, os mais estrelados); pra
+ * baixo abre a lista completa (Q-c). A joga, Y abre os detalhes.
  */
 @Composable
 fun Inicio(
-    recentes: List<PortNaTela>,
-    total: Int,
+    itens: List<PortNaTela>,
     focoInicial: String?,
     aoFocar: (PortNaTela?) -> Unit,
     aoAcao: (PortNaTela) -> Unit,
@@ -61,14 +61,18 @@ fun Inicio(
     aoTodos: () -> Unit,
     aoSecao: (Secao) -> Unit,
 ) {
-    var focado by remember { mutableStateOf(recentes.find { it.port.id == focoInicial } ?: recentes.firstOrNull()) }
+    // o foco guarda o id, não o objeto: a lista muda quando chegam capas e estados
+    var focadoId by remember { mutableStateOf(focoInicial) }
+    val focado = itens.find { it.port.id == focadoId } ?: itens.firstOrNull()
     var noTodos by remember { mutableStateOf(false) }
     val entrada = LocalEntrada.current.atual
+    val pedirCapa = LocalPedirCapa.current
 
     Fundo {
         // arte do jogo em foco, trocando com um fade curto (P-19/P-20)
-        Crossfade(targetState = if (noTodos) null else focado, animationSpec = tween(220), label = "fundo") { pt ->
-            if (pt != null) Arte(pt.port, Modifier.fillMaxSize(), comNome = false)
+        Crossfade(targetState = if (noTodos) null else focado?.port?.id, animationSpec = tween(220), label = "fundo") { id ->
+            val pt = itens.find { it.port.id == id }
+            if (pt != null) Arte(pt.port, Modifier.fillMaxSize(), comNome = false, url = pt.port.heroUrl ?: pt.port.capaUrl, larguraMax = 960)
             else Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(Color(0xFF2A2A2A), Color(0xFF161616), Color(0xFF101010)))))
         }
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.26f to Color(0xF80E0E0E), 0.56f to Color(0x9E0E0E0E), 1f to Color(0x260E0E0E))))
@@ -78,13 +82,13 @@ fun Inicio(
 
         // informações do jogo em foco
         Column(Modifier.padding(start = 32.dp, top = 54.dp).width(460.dp)) {
-            val pt = focado
-            if (noTodos || pt == null) {
+            val pt = if (noTodos) null else focado
+            if (pt == null) {
                 Texto("TODOS OS PORTS", Tipo.logo, Modifier.padding(top = 0.dp))
                 Row(Modifier.padding(top = 14.dp)) { BotaoHydra("Abrir a lista", true, Botao.A, aoClicar = aoTodos) }
             } else {
                 val t = Textos.de(pt.estado)
-                Texto(pt.port.logo, Tipo.logo, Modifier.padding(top = 0.dp))
+                Texto(Titulo.semParenteses(pt.port.titulo), Tipo.logo, Modifier.padding(top = 0.dp))
                 if (pt.estado != Estado.PRONTO) Box(Modifier.padding(top = 9.dp)) { LinhaEstado(pt) }
                 if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.padding(top = 8.dp).width(220.dp))
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -94,7 +98,7 @@ fun Inicio(
             }
         }
 
-        // fileira de recentes
+        // fileira de recentes (ou dos mais estrelados) e o atalho pra lista toda
         val primeiro = remember { FocusRequester() }
         LazyRow(
             Modifier.align(Alignment.BottomStart).padding(bottom = 36.dp).fillMaxWidth()
@@ -106,13 +110,17 @@ fun Inicio(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
-            items(recentes, key = { it.port.id }) { pt ->
+            items(itens, key = { it.port.id }) { pt ->
+                LaunchedEffect(pt.port.id) { pedirCapa(pt.port.id) }
                 var temFoco by remember { mutableStateOf(false) }
                 val escala by animateFloatAsState(if (temFoco) 1.1f else 1f, tween(120), label = "escala")
                 Box(
                     Modifier
-                        .then(if (pt == focado) Modifier.focusRequester(primeiro) else Modifier)
-                        .onFocusChanged { temFoco = it.isFocused; if (it.isFocused) { focado = pt; noTodos = false; aoFocar(pt) } }
+                        .then(if (pt.port.id == focado?.port?.id) Modifier.focusRequester(primeiro) else Modifier)
+                        .onFocusChanged {
+                            temFoco = it.isFocused
+                            if (it.isFocused) { focadoId = pt.port.id; noTodos = false; aoFocar(pt) }
+                        }
                         .scale(escala)
                         .contornoFoco(temFoco, entrada = entrada)
                         .size(132.dp, 74.dp)
@@ -120,7 +128,7 @@ fun Inicio(
                         .clip(RoundedCornerShape(6.dp))
                         .acionavel { aoAcao(pt) }
                 ) {
-                    Arte(pt.port, Modifier.fillMaxSize(), tamanhoNome = 12.sp)
+                    Arte(pt.port, Modifier.fillMaxSize(), tamanhoNome = 12.sp, url = pt.port.capaUrl, larguraMax = 320)
                     Selo(pt, Modifier.align(Alignment.BottomEnd).padding(6.dp))
                     if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.align(Alignment.BottomStart).fillMaxWidth())
                 }
@@ -128,7 +136,7 @@ fun Inicio(
             item(key = "todos") {
                 var temFoco by remember { mutableStateOf(false) }
                 Box(
-                    Modifier.onFocusChanged { temFoco = it.isFocused; if (it.isFocused) { noTodos = true; aoFocar(null) } }
+                    Modifier.onFocusChanged { temFoco = it.isFocused; if (it.isFocused) { noTodos = true; focadoId = null; aoFocar(null) } }
                         .contornoFoco(temFoco, entrada = entrada)
                         .size(132.dp, 74.dp)
                         .border(1.dp, Cor.bordaForte, RoundedCornerShape(6.dp))
@@ -141,9 +149,8 @@ fun Inicio(
         }
         LaunchedEffect(Unit) { primeiro.focarQuandoPuder() }
 
-        val pt = focado
         Dicas(
-            if (noTodos || pt == null) emptyList() else listOf(Botao.Y to "Detalhes"),
+            if (noTodos || focado == null) emptyList() else listOf(Botao.Y to "Detalhes"),
             Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 10.dp),
         )
     }

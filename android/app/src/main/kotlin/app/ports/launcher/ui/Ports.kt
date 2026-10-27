@@ -39,6 +39,7 @@ import app.ports.core.Estado
 import app.ports.core.Filtro
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
+import app.ports.core.Titulo
 
 /**
  * PORTS — deitado. Todos os ports em A–Z (ordem estável), filtros pelo que o
@@ -54,8 +55,11 @@ fun Ports(
     aoSecao: (Secao) -> Unit,
 ) {
     var filtro by rememberSaveable { mutableStateOf(Filtro.TODOS) }
-    var focado by remember { mutableStateOf<PortNaTela?>(null) }
+    // o foco guarda o id: a faixa de baixo mostra sempre o estado atual do port
+    var focadoId by remember { mutableStateOf<String?>(null) }
+    val focado = todos.find { it.port.id == focadoId }
     val entrada = LocalEntrada.current.atual
+    val pedirCapa = LocalPedirCapa.current
     val lista = todos.filter(filtro.aceita)
 
     Fundo {
@@ -67,7 +71,7 @@ fun Ports(
                 var temFoco by remember { mutableStateOf(false) }
                 val sel = f == filtro
                 Row(
-                    Modifier.onFocusChanged { temFoco = it.isFocused; if (it.isFocused) aoFocar(null) }
+                    Modifier.onFocusChanged { temFoco = it.isFocused; if (it.isFocused) { focadoId = null; aoFocar(null) } }
                         .contornoFoco(temFoco, raio = Raio, entrada = entrada)
                         .height(32.dp)
                         .clip(RoundedCornerShape(Raio))
@@ -93,20 +97,24 @@ fun Ports(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             items(lista, key = { it.port.id }) { pt ->
+                LaunchedEffect(pt.port.id) { pedirCapa(pt.port.id) }
                 var temFoco by remember { mutableStateOf(false) }
                 val sobe by animateDpAsState(if (temFoco) (-3).dp else 0.dp, tween(120), label = "sobe")
                 Box(
                     Modifier
                         .then(if (pt.port.id == (focoInicial ?: lista.firstOrNull()?.port?.id)) Modifier.focusRequester(primeiro) else Modifier)
                         .offset(y = sobe)
-                        .onFocusChanged { temFoco = it.isFocused; if (it.isFocused) { focado = pt; aoFocar(pt) } }
+                        .onFocusChanged {
+                            temFoco = it.isFocused
+                            if (it.isFocused) { focadoId = pt.port.id; aoFocar(pt) }
+                        }
                         .contornoFoco(temFoco, entrada = entrada)
                         .aspectRatio(3f / 4f)
                         .shadow(8.dp, RoundedCornerShape(6.dp))
                         .clip(RoundedCornerShape(6.dp))
                         .acionavel { aoAcao(pt) },
                 ) {
-                    Arte(pt.port, Modifier.fillMaxSize())
+                    Arte(pt.port, Modifier.fillMaxSize(), url = pt.port.capaUrl, larguraMax = 360)
                     Selo(pt, Modifier.align(Alignment.BottomEnd).padding(6.dp))
                     if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.align(Alignment.BottomStart).fillMaxWidth())
                 }
@@ -122,7 +130,7 @@ fun Ports(
         ) {
             val pt = focado
             if (pt != null) {
-                Texto(pt.port.titulo, Tipo.botao.copy(color = Cor.claro))
+                Texto(Titulo.semParenteses(pt.port.titulo), Tipo.botao.copy(color = Cor.claro))
                 if (pt.estado != Estado.PRONTO) LinhaEstado(pt, longo = false)
             }
             Box(Modifier.weight(1f))
