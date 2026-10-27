@@ -16,3 +16,14 @@
 .primeiro-uso .pu-pontos i { width: 8px; height: 8px; border-radius: 4px; background: #3a3a3a; transition: width var(--medio); }
 .primeiro-uso .pu-pontos i.atual { width: 22px; background: var(--claro); }
 .primeiro-uso .pu-pontos i.feito { background: var(--texto-2); }
+
+/* ---------------- em pé: capas em cima, texto e botões embaixo */
+@media (max-width: 767px) {
+  .primeiro-uso .pu-mosaico { inset: -40px -40px auto -40px; height: 320px; grid-template-columns: repeat(4, 1fr); }
+  .primeiro-uso .pu-veu { background: linear-gradient(0deg, var(--fundo) 45%, rgba(18,18,18,.5) 70%, rgba(18,18,18,.2)); }
+  .primeiro-uso .pu { left: 20px; right: 20px; top: auto; bottom: 64px; width: auto; }
+  .primeiro-uso h1 { font-size: 24px; }
+  .primeiro-uso .acoes { flex-direction: column; }
+  .primeiro-uso .acoes .btn { width: 100%; }
+  .primeiro-uso .pu-pontos { left: 50%; transform: translateX(-50%); bottom: 28px; }
+}

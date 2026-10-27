@@ -1,9 +1,9 @@
-import { criarRefinamento } from "../refinamento/painel.js";
+import { criarLab } from "../comum/lab.js";
 
 const SECOES = [
-  { n: "topo", nome: "Seções no topo (L1/R1)" },
-  { n: "grupos", nome: "Grupos de ajustes" },
-  { n: "itens", nome: "Ajustes de cada grupo" },
+  { id: "topo", nome: "Seções no topo (L1/R1)" },
+  { id: "grupos", nome: "Grupos de ajustes" },
+  { id: "itens", nome: "Ajustes de cada grupo" },
 ];
 
-export const { variante, aoMudar, montar: montarRefinamento } = criarRefinamento({ pagina: "ajustes", secoes: SECOES, variantes: {} });
+export const { variante, aoMudar, montar: montarRefinamento } = criarLab({ pagina: "ajustes", rotulo: "Ajustes", secoes: SECOES, variantes: {} });

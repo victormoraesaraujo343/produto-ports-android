@@ -35,3 +35,22 @@
 .detalhes .precisa .item-linha b { display: inline; }
 .detalhes .precisa .item-linha small { display: block; }
 html[data-precisa-mostrar="problema"] .detalhes .precisa:not(:has(.warn, .bad, .dl)) { display: none; }
+
+/* ---------------- em pé: arte em cima, uma coluna que rola, ação presa embaixo */
+@media (max-width: 767px) {
+  .tela.detalhes { overflow-y: auto; display: block; }
+  .detalhes .hero-arte { inset: 0 0 auto 0; height: 230px; }
+  .detalhes .hero-veu { inset: 0 0 auto 0; height: 232px; background: linear-gradient(0deg, var(--fundo) 4%, rgba(18,18,18,.2)); }
+  .detalhes .coluna-acao { position: relative; left: auto; top: auto; width: auto; margin: 160px 16px 0; }
+  .detalhes .logo { font-size: 26px; }
+  .detalhes .acoes {
+    position: fixed; z-index: 12; left: 0; right: 0; bottom: 0; margin: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(13,13,13,.96); border-top: 1px solid var(--borda);
+  }
+  .detalhes .acoes #d-principal { flex: 1; }
+  .detalhes .acoes #d-opcoes { width: 44px; padding: 0; font-size: 0; }
+  .detalhes .acoes #d-opcoes::after { content: "⋯"; font-size: 18px; }
+  .detalhes .coluna-info { position: relative; right: auto; top: auto; bottom: auto; width: auto; overflow: visible; padding: 14px 16px 96px; }
+  .detalhes .bloco.focado { outline-color: transparent !important; }
+}

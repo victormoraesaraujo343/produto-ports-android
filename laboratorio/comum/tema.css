@@ -248,3 +248,54 @@ html[data-entrada="toque"] .so-toque-inline { display: inline; }
 .passos .item-linha { padding: 6px 0; }
 .passos .item-linha.atual b { color: var(--claro); }
 .passos .item-linha.depois b { color: var(--texto-2); font-weight: 500; }
+
+/* ============================================================ EM PÉ (≤ 767 px)
+   Toque primeiro: abas embaixo, painéis sobem de baixo, alvos de 44 px+. */
+.abas { display: none; }
+@media (max-width: 767px) {
+  .topo { display: none; }
+  .tela { display: flex; flex-direction: column; }
+  .abas {
+    display: flex; position: absolute; z-index: 15; left: 0; right: 0; bottom: 0;
+    height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
+    background: var(--fundo-escuro); border-top: 1px solid var(--borda);
+    justify-content: space-around; align-items: center;
+  }
+  .aba { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 88px; padding: 6px 0; font-size: 11.5px; color: var(--texto-2); }
+  .aba-ico { font-size: 19px; line-height: 1; }
+  .aba.atual { color: var(--claro); font-weight: 600; }
+  .aba.atual .aba-ico { color: var(--teal); }
+
+  .caminho { padding: 0 12px; height: 52px; background: linear-gradient(180deg, rgba(18,18,18,.92), rgba(18,18,18,0)); }
+  .caminho .voltar { min-width: 44px; min-height: 44px; }
+  .caminho .relogio { display: none; }
+
+  .btn { height: 44px; }
+
+  /* Opções vira painel que sobe de baixo */
+  .lateral {
+    top: auto; left: 0; right: 0; width: auto; max-height: 75%;
+    border-left: 0; border-top: 1px solid var(--borda); border-radius: 18px 18px 0 0;
+    padding: 10px 0 calc(12px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+  }
+  .lateral::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 2px; background: #444; margin: 0 auto 12px; }
+  .lateral .opcao { padding: 14px 22px; font-size: 15px; }
+  .lateral .rodape { border-top: 0; padding-top: 4px; }
+  .lateral .rodape .g, .lateral .rodape > :not(.fechar-toque) { display: none; }
+  .lateral .fechar-toque { width: 100%; margin: 0 !important; }
+
+  .dialogo { width: calc(100% - 32px); }
+  .dialogo .acoes { flex-direction: column-reverse; }
+  .dialogo .acoes .btn { width: 100%; }
+
+  /* fluxos (arquivo, instalar): uma coluna que rola */
+  .fluxo-arte { inset: 0 0 auto 0; height: 220px; opacity: .7; }
+  .fluxo-veu { inset: 0 0 auto 0; height: 222px; background: linear-gradient(0deg, var(--fundo) 2%, rgba(18,18,18,.25)); }
+  .fluxo { position: relative; left: auto; top: auto; width: auto; margin: 150px 18px 0; }
+  .fluxo h1 { font-size: 22px; }
+  .fluxo .acoes { flex-direction: column; }
+  .fluxo .acoes .btn { width: 100%; }
+  .passos { position: relative; right: auto; top: auto; width: auto; margin: 18px 18px 28px; padding-top: 14px; border-top: 1px solid var(--borda); }
+  .tela.fluxo-tela { overflow-y: auto; }
+}

@@ -3,7 +3,7 @@
    estado, painel de Opções). */
 import "./tema.css";
 import { ESTADOS } from "./dados.js";
-import { focar, abrirCamada, fecharCamada, camadaAberta } from "./foco.js";
+import { focar, abrirCamada, fecharCamada, camadaAberta, definirEntrada } from "./foco.js";
 
 export const SECOES = [
   ["inicio", "Início"],
@@ -12,6 +12,13 @@ export const SECOES = [
 ];
 export const urlDa = (pagina, busca = "") => `/laboratorio/${pagina}/index.html${busca}`;
 export const emPe = () => matchMedia("(max-width: 767px)").matches;
+/* virar o aparelho troca o layout inteiro: no lab, recarrega a página.
+   Em pé, a entrada padrão é o toque (P-24: muda a forma, não a estrutura). */
+matchMedia("(max-width: 767px)").addEventListener("change", () => location.reload());
+if (emPe()) definirEntrada("toque");
+else if (document.documentElement.dataset.entrada === "toque") definirEntrada("xbox");
+
+const ICONES = { inicio: "⌂", ports: "▦", ajustes: "⚙" };
 
 /* ------------------------------------------------------------ peças */
 export const esc = (s = "") => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -24,7 +31,8 @@ export const arte = (p, extra = "") =>
 export const estadoDe = (p) => ESTADOS[p.estado];
 export const estadoHtml = (p, { longo = true } = {}) => {
   const e = estadoDe(p);
-  const texto = p.estado === "baixando" ? `${e.longo} · ${p.progresso}%` : p.estado === "atualizar" ? `${e.longo}: ${p.novaVersao}` : longo ? e.longo : e.curto;
+  const base = longo ? e.longo : e.curto;
+  const texto = p.estado === "baixando" ? `${base} · ${p.progresso}%` : p.estado === "atualizar" ? `${base}: ${p.novaVersao}` : base;
   return `<span class="estado ${e.tom}"><span class="s" aria-hidden="true">${e.simbolo}</span>${esc(texto)}</span>`;
 };
 export const seloHtml = (p, { palavra = false } = {}) => {
@@ -36,11 +44,12 @@ export const seloHtml = (p, { palavra = false } = {}) => {
 export function montarTela({ secao, conteudo, dicas = [], classe = "", caminho = null }) {
   document.body.innerHTML = `
     <div class="palco">
-      <div class="tela ${classe}" data-secao="${secao ?? ""}">
+      <div class="tela ${classe}" data-aba="${secao ?? ""}">
         ${secao ? topoHtml(secao) : ""}
         ${caminho ? caminhoHtml(caminho) : ""}
         ${conteudo}
         <div class="dicas" data-dicas>${dicasHtml(dicas)}</div>
+        ${secao ? abasHtml(secao) : ""}
       </div>
       <p class="legenda-lab" aria-label="Atalhos do lab">
         <span><kbd>←↑↓→</kbd> mover</span><span><kbd>Enter</kbd> A</span><span><kbd>Esc</kbd> B</span>
@@ -77,6 +86,13 @@ function caminhoHtml(partes) {
 export function voltar(padrao = "inicio") {
   if (history.length > 1 && document.referrer.startsWith(location.origin)) history.back();
   else irPara(padrao);
+}
+
+/* em pé: as mesmas três seções, embaixo, no alcance do polegar (D-003) */
+function abasHtml(secao) {
+  return `<nav class="abas" data-lab="abas" aria-label="Seções">
+    ${SECOES.map(([id, nome]) => `<button type="button" class="aba${id === secao ? " atual" : ""}" data-ir="${id}" ${id === secao ? 'aria-current="page"' : ""}><span class="aba-ico" aria-hidden="true">${ICONES[id]}</span>${nome}</button>`).join("")}
+  </nav>`;
 }
 
 export const dicasHtml = (dicas) => dicas.map(([b, t]) => `<span>${g(b)}${esc(t)}</span>`).join("");

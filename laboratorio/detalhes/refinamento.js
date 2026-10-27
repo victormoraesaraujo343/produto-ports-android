@@ -1,16 +1,16 @@
-import { criarRefinamento } from "../refinamento/painel.js";
+import { criarLab } from "../comum/lab.js";
 
 const SECOES = [
-  { n: "caminho", nome: "Caminho e voltar" },
-  { n: "acao", nome: "Nome, estado e ação principal" },
-  { n: "precisa", nome: "O que o port precisa (estado detalhado)" },
-  { n: "info", nome: "Sobre, ficha e origem" },
-  { n: "desinstalar", nome: "Confirmar desinstalação" },
-  { n: "opcoes", nome: "Painel de Opções (☰)" },
+  { id: "caminho", nome: "Caminho e voltar" },
+  { id: "acao", nome: "Nome, estado e ação principal" },
+  { id: "precisa", nome: "O que o port precisa (estado detalhado)" },
+  { id: "info", nome: "Sobre, ficha e origem" },
+  { id: "desinstalar", nome: "Confirmar desinstalação" },
+  { id: "opcoes", nome: "Painel de Opções (☰)" },
 ];
 
 const VARIANTES = {
   precisaMostrar: { secao: "precisa", rotulo: "Quando mostrar a lista", opcoes: [["sempre", "Sempre"], ["problema", "Só quando falta algo"]] },
 };
 
-export const { variante, aoMudar, montar: montarRefinamento } = criarRefinamento({ pagina: "detalhes", secoes: SECOES, variantes: VARIANTES });
+export const { variante, aoMudar, montar: montarRefinamento } = criarLab({ pagina: "detalhes", rotulo: "Detalhes do port", secoes: SECOES, variantes: VARIANTES });

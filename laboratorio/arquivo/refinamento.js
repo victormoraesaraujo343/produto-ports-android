@@ -1,14 +1,14 @@
-import { criarRefinamento } from "../refinamento/painel.js";
+import { criarLab } from "../comum/lab.js";
 
 const SECOES = [
-  { n: "caminho", nome: "Caminho e voltar" },
-  { n: "fluxo", nome: "Texto e ação de cada passo (início, conferindo, não serve, preparando, pronto)" },
-  { n: "passos", nome: "Lista de passos à direita" },
-  { n: "seletor", nome: "Seletor de arquivos do Android (simulado)" },
+  { id: "caminho", nome: "Caminho e voltar" },
+  { id: "fluxo", nome: "Texto e ação de cada passo (início, conferindo, não serve, preparando, pronto)" },
+  { id: "passos", nome: "Lista de passos à direita" },
+  { id: "seletor", nome: "Seletor de arquivos do Android (simulado)" },
 ];
 
 const VARIANTES = {
   passosMostrar: { secao: "passos", rotulo: "Lista de passos", opcoes: [["mostrar", "Mostrar"], ["esconder", "Esconder"]] },
 };
 
-export const { variante, aoMudar, montar: montarRefinamento } = criarRefinamento({ pagina: "arquivo", secoes: SECOES, variantes: VARIANTES });
+export const { variante, aoMudar, montar: montarRefinamento } = criarLab({ pagina: "arquivo", rotulo: "Arquivo do jogo", secoes: SECOES, variantes: VARIANTES });

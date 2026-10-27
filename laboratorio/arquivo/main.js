@@ -21,7 +21,7 @@ const ARQUIVOS = [
 ];
 
 const tela = montarTela({
-  classe: "arquivo",
+  classe: "arquivo fluxo-tela",
   caminho: [p.titulo, "Arquivo do jogo"],
   conteudo: `
     <div class="fluxo-arte arte" style="--c1:${p.cor?.[0] ?? "#333"};--c2:${p.cor?.[1] ?? "#222"};--c3:${p.cor?.[2] ?? "#111"}"></div>

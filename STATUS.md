@@ -1,20 +1,22 @@
 # Status
 
-*Atualizado em 2026-10-26.*
+*Atualizado em 2026-10-27.*
 
 ## Onde estamos
 
-O projeto começou hoje. A direção está decidida (D-001 a D-004) a partir de mockups. O lab está sendo montado, começando pelas telas deitadas.
+Lab com todas as telas nas duas posições, pronto pra rodada R1 do Victor no painel. Selo: `LAB REVISADO` pela IA (carrega sem erro, sem estouro de largura, navegação por teclado conferida). Ainda não foi revisado pelo Victor nem testado com controle de verdade.
 
 ## O que existe
 
 - Os documentos do projeto (visão, decisões e arquitetura proposta).
-- O `laboratorio/` com o painel de Refinamento copiado do `lab-modelo-loja`.
+- `laboratorio/`: 8 telas (Início, Ports, Detalhes, Ajustes, Arquivo do jogo, Instalar/atualizar, Abrindo/não abriu, Primeiro uso), deitadas (controle: foco, L1/R1, botões que seguem o controle em uso) e em pé (toque: abas embaixo, Opções que sobem de baixo).
+- Painel de Refinamento do portfólio (D-006).
 
 ## Esperando o Victor
 
-- Conferir as escolhas da IA Q-a, Q-b e Q-c e a stack D-005 (`DECISIONS.md`).
+- Fazer a rodada R1 no painel (`npm run lab`).
+- Conferir as escolhas da IA Q-a a Q-d e a stack D-005 (`DECISIONS.md`).
 
 ## Próximo
 
-Roadmap 1 e 2: telas do lab.
+Roadmap 3: uma rodada de refinamento. Depois, o catálogo (roadmap 4) e o app (roadmap 5).

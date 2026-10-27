@@ -1,0 +1,89 @@
+/* Sistema do laboratório · base.
+   Tema de ferramenta da identidade do Victor Moraes: as cores e as famílias vêm da
+   identidade (src/styles/identidade/tokens.css); aqui elas ganham função.
+   Referência viva: /pt/lab/sistema/ (só em dev). Prefixo --rf- em tudo. */
+:root {
+  /* Cor · superfícies */
+  --rf-fundo: var(--neutral-900, #101112);       /* carvão: o painel */
+  --rf-elevada: var(--brand-graphite, #26292d);  /* grafite: o que sobe (seção aberta, hover) */
+  --rf-destaque: #34383d;                        /* grafite claro: o item atual numa lista */
+  --rf-linha: #3a3e43;                           /* toda borda e divisória */
+
+  /* Cor · texto */
+  --rf-texto: var(--neutral-50, #eeeae3);        /* papel */
+  --rf-texto-2: var(--brand-aluminum, #b9bec4);  /* alumínio: rótulos, secundário */
+  --rf-texto-3: #8a8f95;                         /* apagado: dica, vazio, desligado */
+
+  /* Cor · sinal e estado */
+  --rf-ativo: var(--brand-orange, #ff7300);      /* laranja: só o que está ativo agora */
+  --rf-sobre-claro: var(--neutral-900, #101112); /* texto sobre laranja, papel ou estado */
+  --rf-aprovada: #a4d7a8;
+  --rf-ajustar: #ffaaa5;
+  --rf-inverso: var(--neutral-50, #eeeae3);      /* fundo de ferramenta ligada e ação primária */
+  --rf-inverso-forte: #fff;                      /* ação primária sob o mouse */
+
+  /* Tipo · famílias */
+  --rf-f-titulo: var(--font-display, 'Barlow Condensed', sans-serif);
+  --rf-f-texto: var(--font-body, 'IBM Plex Sans', system-ui, sans-serif);
+  --rf-f-dado: var(--font-mono, 'IBM Plex Mono', monospace);
+
+  /* Tipo · estilos (Barlow sempre em caixa alta, ver .rf-titulo-*) */
+  --rf-t-titulo-1: 700 19px/1 var(--rf-f-titulo);   /* nome da página, cabeçalho de cartão */
+  --rf-t-titulo-2: 700 16px/1 var(--rf-f-titulo);   /* cabeçalho de gaveta e de rodada, número no trilho */
+  --rf-t-titulo-3: 600 16px/1.1 var(--rf-f-titulo); /* nome de seção */
+  --rf-t-titulo-4: 700 14px/1 var(--rf-f-titulo);   /* botão de rodada, título no Arquivo */
+  --rf-t-texto: 400 13px/1.45 var(--rf-f-texto);    /* anotação, conversa, corpo */
+  --rf-t-texto-p: 400 12px/1.4 var(--rf-f-texto);   /* opção de variação, dica, chip */
+  --rf-t-dado: 400 11px/1.3 var(--rf-f-dado);       /* contadores, salvo, atalhos */
+  --rf-t-dado-p: 400 10.5px/1.3 var(--rf-f-dado);   /* rótulos em caixa alta */
+  --rf-entre-titulo: .03em;
+  --rf-entre-rotulo: .05em;
+
+  /* Espaço */
+  --rf-e-1: 2px;
+  --rf-e-2: 4px;
+  --rf-e-3: 6px;
+  --rf-e-4: 8px;
+  --rf-e-5: 10px;
+  --rf-e-6: 12px;
+  --rf-e-7: 16px;
+  --rf-e-8: 24px;
+
+  /* Alturas de controle */
+  --rf-a-1: 22px; /* marca: número, tecla, A/B/C */
+  --rf-a-2: 28px; /* controle: ícone, secundário, primário */
+  --rf-a-3: 34px; /* controle da Doca: opção compacta, decisão */
+  --rf-a-4: 38px; /* destaque: seção atual, página */
+
+  /* Raio */
+  --rf-r-1: 2px; /* marcas: número, tecla, selo */
+  --rf-r-2: 4px; /* controles e blocos */
+  --rf-r-3: 6px; /* superfícies: painel, doca, cartão, gaveta */
+  --rf-r-redondo: 99px; /* só sinais: ponto, alfinete */
+
+  /* Borda e sombra */
+  --rf-borda: 1px solid var(--rf-linha);
+  --rf-sombra-painel: 0 30px 80px -20px rgb(0 0 0 / .65);
+  --rf-sombra-flutuante: 0 16px 40px -12px rgb(0 0 0 / .55);
+
+  /* Movimento */
+  --rf-curva: cubic-bezier(.2, .8, .2, 1);
+  --rf-m-rapido: 140ms; /* resposta: hover, ligar, trocar */
+  --rf-m-entrada: 220ms; /* algo chega: cartão, aviso, alfinete */
+
+  /* Camadas (de baixo para cima) */
+  --rf-z-marca: 45;
+  --rf-z-alfinete: 46;
+  --rf-z-visor: 88;
+  --rf-z-botao: 90;
+  --rf-z-painel: 91;
+  --rf-z-popover: 95;
+  --rf-z-aviso: 96;
+
+  /* Ícones */
+  --rf-i-1: 16px;
+  --rf-i-2: 13px;
+  --rf-i-traco: 1.6;
+
+  /* Pontos de quebra (referência; CSS não lê variável em @media): celular ≤ 767px, Doca estreita ≤ 1100px */
+}

@@ -1,8 +1,8 @@
-import { criarRefinamento } from "../refinamento/painel.js";
+import { criarLab } from "../comum/lab.js";
 
 const SECOES = [
-  { n: "abrindo", nome: "Abrindo o jogo · aviso de como voltar" },
-  { n: "caminhos", nome: "Não abriu: caminhos pra resolver" },
+  { id: "abrindo", nome: "Abrindo o jogo · aviso de como voltar" },
+  { id: "caminhos", nome: "Não abriu: caminhos pra resolver" },
 ];
 
-export const { variante, aoMudar, montar: montarRefinamento } = criarRefinamento({ pagina: "abrindo", secoes: SECOES, variantes: {} });
+export const { variante, aoMudar, montar: montarRefinamento } = criarLab({ pagina: "abrindo", rotulo: "Abrindo e não abriu", secoes: SECOES, variantes: {} });

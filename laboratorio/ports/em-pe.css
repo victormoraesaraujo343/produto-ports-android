@@ -1,0 +1,19 @@
+/* PORTS — em pé */
+.ports-pe .pe-rolagem { position: absolute; inset: 0 0 64px 0; overflow-y: auto; padding-bottom: 20px; }
+.ports-pe .pe-cabeca { padding: 14px 16px 6px; display: flex; flex-direction: column; gap: 10px; }
+.ports-pe .pe-cabeca h1 { margin: 0; font-size: 24px; color: var(--claro); }
+.pe-busca { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: var(--raio); background: var(--fundo-escuro); border: 1px solid var(--borda); color: var(--texto-2); }
+.pe-busca input { flex: 1; background: none; border: 0; outline: 0; color: var(--claro); font: inherit; font-size: 15px; }
+.pe-busca:focus-within { border-color: var(--borda-forte); }
+.pe-chips { display: flex; gap: 8px; padding: 8px 16px; overflow-x: auto; scrollbar-width: none; }
+.pe-chips::-webkit-scrollbar { display: none; }
+.pe-chips .chip { height: 36px; flex: none; }
+.pe-ordem { padding: 4px 16px 10px; font-size: 12.5px; color: var(--texto-2); }
+.pe-grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px; padding: 0 16px; }
+.pe-capa { display: flex; flex-direction: column; gap: 4px; text-align: left; min-width: 0; }
+.pe-capa .vcapa { display: block; width: 100%; }
+.pe-nome { font-size: 12.5px; font-weight: 600; color: var(--claro); line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pe-estado { font-size: 11.5px; font-weight: 600; }
+.pe-estado.ok { color: var(--ok); } .pe-estado.dl { color: var(--teal-claro); } .pe-estado.warn { color: var(--aviso); } .pe-estado.bad { color: var(--ruim); } .pe-estado.neutro { color: var(--texto-2); }
+.ports-pe .vazio { padding: 0 16px; color: var(--texto-2); }
+.pe-capa .vcapa .arte[data-logo]::after { font-size: 11px; }

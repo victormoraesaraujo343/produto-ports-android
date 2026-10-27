@@ -44,8 +44,19 @@
 
 **Por quê:** instalação de APK (`PackageInstaller`), acesso a arquivos (SAF) e entrada de controle são APIs nativas. O `roseta-launcher` já usa Kotlin + Compose, então dá pra reaproveitar padrões de lá.
 
+## D-006 — Painel de Refinamento do portfólio
+
+**Status:** aceita · **Data:** 2026-10-27
+
+**Decisão:** o lab usa o painel do `victor-moraes-site` (layouts A/B/C, aprovar várias variações, arquivo de conversas), não o do `lab-modelo-loja`.
+
+**Por quê:** o Victor pediu, porque considera o outro muito ruim.
+
+**Consequências:** a variação troca com Shift + ←/→, já que as setas são o direcional do app. A página do sistema do painel não veio junto, porque depende da identidade do portfólio. Detalhes em `laboratorio/refinamento/README.md`.
+
 ## Decisões da IA que o Victor precisa conferir
 
 - **Q-a:** "Ports" substitui Catálogo e Biblioteca, com filtros Instalados, Disponíveis e Atualizações.
 - **Q-b:** não existe aba Downloads; o progresso aparece na capa do próprio jogo.
+- **Q-d:** em pé, tocar num jogo abre os detalhes; a ação principal fica num botão na própria linha (Início) ou na barra presa embaixo (Detalhes). Segurar o dedo abre as Opções, como atalho.
 - **Q-c:** deitado, o direcional pra baixo abre a lista completa de ports, e os detalhes ficam no Y. Isso resolve aqui o conflito C-1 do Roseta.

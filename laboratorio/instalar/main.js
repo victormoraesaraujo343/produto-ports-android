@@ -15,7 +15,7 @@ const atualizando = params.get("modo") === "atualizar";
 let passo = params.get("passo") ?? "baixando";
 
 const tela = montarTela({
-  classe: "instalar",
+  classe: "instalar fluxo-tela",
   caminho: [p.titulo, atualizando ? "Atualizar" : "Instalar"],
   conteudo: `
     <div class="fluxo-arte ${p.cor ? "arte" : ""}" ${p.cor ? `style="--c1:${p.cor[0]};--c2:${p.cor[1]};--c3:${p.cor[2]}"` : ""}></div>

@@ -15,7 +15,7 @@ Contradição não se resolve em silêncio: aponte e registre a resolução.
 
 ## Esquema Lab + Desenvolvimento
 
-- **Lab** (`laboratorio/`): as telas em HTML com o painel de Refinamento (tecla R). O Victor anota, coloca alfinetes e fecha a rodada. A IA lê `laboratorio/<tela>/ANOTACOES.md`, **traz uma síntese antes de executar**, executa, responde no `anotacoes.json` e faz um commit por rodada. O protocolo está em `laboratorio/refinamento/README.md`.
+- **Lab** (`laboratorio/`): as telas em HTML, cada uma nas versões deitada e em pé, com o painel de Refinamento **do portfólio** (tecla R, D-006). O Victor anota, coloca alfinetes, aprova e fecha a rodada. A IA lê `laboratorio/<tela>/ANOTACOES.md`, **traz uma síntese antes de executar**, executa, responde em `anotacoes.json` (`versoes.pagina.secoes[n]`) e faz um commit por rodada. O protocolo está em `laboratorio/refinamento/README.md`. Nunca rode teste que grave no `anotacoes.json` real.
 - **Desenvolvimento** (`app/`, quando existir): o app Android em Kotlin + Compose implementa o que saiu do lab.
 - O ritmo combinado é rápido: **poucas rodadas no lab** (D-004).
 - Só o Victor aprova. "Ficou bom" não é aprovação. No painel, quem marca "Aprovada" é ele.

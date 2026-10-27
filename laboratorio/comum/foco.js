@@ -100,11 +100,13 @@ const TECLAS = {
   x: ["botao", "x"], y: ["botao", "y"], q: ["botao", "l1"], e: ["botao", "r1"], o: ["botao", "menu"],
 };
 addEventListener("keydown", (ev) => {
-  if (ev.target.closest?.(".rf-painel, .rf-visor, input, textarea, [contenteditable]")) return;
-  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  if (ev.target.closest?.(".rf-painel, .rf-pop, .rf-visor, .rf-botao, input, textarea, [contenteditable]")) return;
+  if (ev.ctrlKey || ev.metaKey || ev.altKey || ev.shiftKey) return;
   const t = TECLAS[ev.key] ?? TECLAS[ev.key.toLowerCase?.()];
   if (!t) return;
   ev.preventDefault();
+  /* a tecla é do app: o painel de Refinamento (registrado depois) não a vê */
+  ev.stopImmediatePropagation();
   if (html.dataset.entrada === "toque") definirEntrada("xbox");
   t[0] === "mover" ? mover(t[1]) : apertar(t[1]);
 });
@@ -113,7 +115,7 @@ addEventListener("keydown", (ev) => {
    Clicar foca e ativa. Só o toque troca a entrada pra "toque" (o mouse é a
    ferramenta do lab, não um modo do app). */
 addEventListener("pointerdown", (ev) => {
-  if (ev.target.closest?.(".rf-painel, .rf-visor")) return;
+  if (ev.target.closest?.(".rf-painel, .rf-pop, .rf-visor, .rf-botao")) return;
   if (ev.pointerType === "touch") definirEntrada("toque");
   const el = ev.target.closest?.("[data-foco]");
   if (el && camadaAtiva().contains(el)) focar(el, { rolar: false });

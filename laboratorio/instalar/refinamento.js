@@ -1,10 +1,10 @@
-import { criarRefinamento } from "../refinamento/painel.js";
+import { criarLab } from "../comum/lab.js";
 
 const SECOES = [
-  { n: "caminho", nome: "Caminho e voltar" },
-  { n: "fluxo", nome: "Baixando, conferindo, instalado / atualizado" },
-  { n: "passos", nome: "Lista de passos à direita" },
-  { n: "sistema", nome: "Confirmação do Android (simulada)" },
+  { id: "caminho", nome: "Caminho e voltar" },
+  { id: "fluxo", nome: "Baixando, conferindo, instalado / atualizado" },
+  { id: "passos", nome: "Lista de passos à direita" },
+  { id: "sistema", nome: "Confirmação do Android (simulada)" },
 ];
 
-export const { variante, aoMudar, montar: montarRefinamento } = criarRefinamento({ pagina: "instalar", secoes: SECOES, variantes: {} });
+export const { variante, aoMudar, montar: montarRefinamento } = criarLab({ pagina: "instalar", rotulo: "Instalar e atualizar", secoes: SECOES, variantes: {} });

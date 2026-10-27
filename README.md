@@ -15,4 +15,4 @@ npm install
 npm run lab   # http://localhost:5192/laboratorio/index.html
 ```
 
-Deitado é a vista padrão. Pra ver a versão em pé, aperte **V** no painel. O painel de Refinamento abre e fecha com **R**.
+Deitado é a vista padrão (setas, Enter = A, Esc = B, Y, Q/E = L1/R1, O = Opções; controle de verdade também funciona). Pra ver em pé, aperte **V**. O painel de Refinamento (o do portfólio) abre e fecha com **R**; a variação troca com **Shift + ←/→**.
