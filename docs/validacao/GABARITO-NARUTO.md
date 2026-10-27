@@ -20,3 +20,9 @@ Levantamento manual em 2026-10-27 (busca no GitHub feita fora do robô, só pra 
 **Passa** quando os 5 jogos com APK (Rise of a Ninja, Storm 2, 3 FB, Generations e Revolution) aparecem no app, instaláveis. The Broken Bond entra sozinho quando o autor publicar um APK.
 
 Regras genéricas criadas a partir desse caso, e que valem pra qualquer jogo: busca também em português e espanhol ("recompilação estática", "port nativo") e outros ports do mesmo autor de um port já aceito.
+
+## Resultado (2026-10-27)
+
+**Passou: 5 de 5.** Na lista online publicada às 06:52 UTC (673 ports, 194 com APK Android), aparecem Rise of a Ninja, Storm 2, Storm 3 Full Burst, Storm Generations e Storm Revolution, além do Connections como bônus. Nenhuma regra do robô cita Naruto. Eles entraram por três regras genéricas: busca em português e espanhol, outros ports do mesmo autor e APK numa release anterior à mais recente.
+
+No Odin 2 (app 0.2.0), o filtro Xbox 360 mostra os jogos com a capa certa, e os Detalhes do Rise of a Ninja mostram a versão 0.2 (39 MB), com o APK tirado de uma release anterior (`docs/aparelho/odin2-v0.2.0-*.png`). Nada foi instalado.

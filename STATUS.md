@@ -4,7 +4,7 @@
 
 ## Onde estamos
 
-O app funciona de ponta a ponta no AYN Odin 2 (`TESTADO NO APARELHO`, 2026-10-27). Ele lê a lista online do `ports-catalogue` (31 ports com APK, 28 sem os de VR) e instala o port oficial (Gen2Recomped) baixado do GitHub. O Android pediu a permissão e a confirmação, e o Victor aceitou. O **Jogar** abriu o port, que importou o dump do Victor (Pokémon Silver USA/Europe, SHA-1 conferido) e rodou o jogo. As capturas estão em `docs/aparelho/`. Capas reais do SteamGridDB conferidas no Odin, com a chave que o Victor colou em Ajustes.
+**v0.2.0 publicada** (release no GitHub) e `TESTADO NO APARELHO` no Odin 2 em 2026-10-27. A lista online do `ports-catalogue` tem 194 ports com APK Android (eram 31), vindos da awesome-decomp-games (incluindo os feitos com IA, com etiqueta) e de buscas automáticas no GitHub: em inglês, português e espanhol, forks Android e outros ports do mesmo autor. Passou no gabarito do Naruto (`docs/validacao/GABARITO-NARUTO.md`). Detalhes com galeria de gameplay em cima do nome (D-009), filtro por console (incluindo PC e Outros), Ver os Detalhes antes de instalar (D-008).
 
 ## O que existe
 
