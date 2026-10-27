@@ -83,6 +83,35 @@
   [data-galeria="faixa"] .sobre-faixa { position:absolute; z-index:2; right:40px; top:40px; width:400px; padding:12px 14px; border-radius:var(--raio);
                                          background:rgba(13,13,13,.72); border:1px solid var(--borda); line-height:1.5 }
 
+  /* ---------- onde ficam as infos (variações do 1) ---------- */
+  .info-esq, .info-baixo, .abas, .desce, [data-painel="sobre"], [data-painel="ficha"] { display:none }
+  .bloco { padding:12px 14px; border-radius:var(--raio); background:rgba(13,13,13,.78); border:1px solid var(--borda); line-height:1.5 }
+  .bloco p { margin:0 }
+  dl { margin:0; display:grid; grid-template-columns:96px 1fr; gap:6px 10px; font-size:13.5px }
+  dt { color:var(--texto-2) } dd { margin:0; color:var(--claro) }
+  /* I1 */
+  [data-galeria="visor"][data-infos="esquerda"] .info-esq { display:block; margin-top:16px }
+  [data-galeria="visor"][data-infos="esquerda"] .precisa { margin-top:14px }
+  .info-esq p { margin:0; font-size:13.5px; line-height:1.5; color:var(--texto);
+                display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden }
+  .ficha-linha { margin-top:8px; font-size:12.5px; color:var(--texto-2) }
+  .ficha-linha b { color:var(--texto); font-weight:600 }
+  /* I2: a coluna da direita rola; ↓ das miniaturas desce até as infos */
+  [data-galeria="visor"][data-infos="baixo"] .galeria { bottom:0; overflow-y:auto; scrollbar-width:none; padding-bottom:44px }
+  [data-galeria="visor"][data-infos="baixo"] .galeria::-webkit-scrollbar { display:none }
+  [data-galeria="visor"][data-infos="baixo"] .desce { display:block; margin-top:10px; font-size:12.5px; color:var(--texto-2) }
+  [data-galeria="visor"][data-infos="baixo"] .info-baixo { display:flex; flex-direction:column; gap:10px; margin-top:16px }
+  /* I3: abas sobre o visor, uma por vez (P-33) */
+  [data-galeria="visor"][data-infos="abas"] .abas { display:flex; gap:18px; align-items:center; margin-bottom:10px }
+  .aba { font-size:14px; font-weight:500; color:var(--texto-2); padding-bottom:4px; border-bottom:2px solid transparent; cursor:pointer }
+  .aba.atual { color:var(--claro); border-color:var(--claro) }
+  .aba-dica { margin-left:auto; display:flex; gap:6px }
+  .aba-dica .g { width:auto; padding:0 6px; border-radius:5px; background:#3a3a3a; font-size:10.5px; height:18px }
+  [data-galeria="visor"][data-infos="abas"] [data-painel] { display:none }
+  [data-galeria="visor"][data-infos="abas"] [data-painel].mostrar { display:block }
+  [data-galeria="visor"][data-infos="abas"] [data-painel="sobre"], [data-galeria="visor"][data-infos="abas"] [data-painel="ficha"] { height:248px; overflow:auto }
+  /* no 2 (faixa) as infos continuam no bloco de cima à direita */
+
   .dicas { position:absolute; z-index:3; right:40px; bottom:12px; display:flex; gap:16px; font-size:12.5px; color:var(--texto-2) }
   .dicas span { display:inline-flex; gap:6px; align-items:center }
   .dicas .g { background:#2d2d2d }
@@ -103,15 +132,16 @@
 <body>
 <main>
   <h1>Detalhes · galeria e fundo</h1>
-  <p class="sub">Imagens reais: a caixa, a tela de título e uma captura vêm do libretro-thumbnails. No Banjo, as capturas do port rodando no Android vêm do README do projeto. Use as setas ← → (ou clique) pra andar na galeria, Enter abre em tela cheia e Esc fecha.</p>
+  <p class="sub">Só gameplay, com imagens reais. "Port" é o próprio port rodando no Android, tirado do README e das pastas de imagens do projeto. "Gameplay" é a captura do jogo original (libretro-thumbnails, uma por versão). A caixa fica só como capa. Use as setas ← → (ou clique) pra andar na galeria, Enter abre em tela cheia e Esc fecha. No I2, ↓/↑ rolam a coluna; no I3, Q/E trocam a aba (no Odin seriam L2/R2).</p>
 
   <div class="opcoes">
     <div class="grupo" data-op="jogo"><span>Jogo</span><button data-v="banjo" aria-pressed="true">Banjo-Kazooie</button><button data-v="pokemon">Pokémon Silver</button></div>
     <div class="grupo" data-op="fundo"><span>Fundo</span><button data-v="slideshow" aria-pressed="true">A · Imagens passando, com zoom lento</button><button data-v="espelho">B · Espelho da imagem em foco</button></div>
     <div class="grupo" data-op="galeria"><span>Galeria</span><button data-v="visor" aria-pressed="true">1 · Visor grande + miniaturas</button><button data-v="faixa">2 · Faixa larga embaixo</button></div>
+    <div class="grupo" data-op="infos"><span>Infos (no 1)</span><button data-v="esquerda" aria-pressed="true">I1 · Esquerda, compacto</button><button data-v="baixo">I2 · Embaixo da galeria (rola)</button><button data-v="abas">I3 · Abas no visor</button></div>
   </div>
 
-  <div class="tela" id="tela" data-fundo="slideshow" data-galeria="visor">
+  <div class="tela" id="tela" data-fundo="slideshow" data-galeria="visor" data-infos="esquerda">
     <div class="fundo"><div class="camada" data-c="0"></div><div class="camada" data-c="1"></div></div>
     <div class="veu"></div>
 
@@ -128,13 +158,27 @@
         <div class="item"><i class="n">+</i>Port não instalado</div>
         <div class="item"><i>✓</i>Roda neste aparelho</div>
       </div>
+      <div class="info-esq">
+        <p data-sobre-txt></p>
+        <div class="ficha-linha" data-ficha-linha></div>
+      </div>
     </section>
 
     <div class="sobre-faixa" data-sobre></div>
 
-    <section class="galeria">
-      <div class="visor" data-visor></div>
-      <div class="miniaturas" data-miniaturas></div>
+    <section class="galeria" data-rolagem>
+      <nav class="abas" aria-label="Abas"><span class="aba atual" data-aba="galeria">Galeria</span><span class="aba" data-aba="sobre">Sobre</span><span class="aba" data-aba="ficha">Ficha</span><span class="aba-dica"><span class="g">L2</span><span class="g">R2</span></span></nav>
+      <div class="painel-aba" data-painel="galeria">
+        <div class="visor" data-visor></div>
+        <div class="miniaturas" data-miniaturas></div>
+        <div class="desce">↓ Sobre e ficha</div>
+      </div>
+      <div class="painel-aba bloco" data-painel="sobre"><p data-sobre-txt></p></div>
+      <div class="painel-aba bloco" data-painel="ficha"><dl data-ficha-dl></dl></div>
+      <div class="info-baixo">
+        <div class="bloco"><div class="rotulo">Sobre</div><p data-sobre-txt></p></div>
+        <div class="bloco"><div class="rotulo">Ficha</div><dl data-ficha-dl></dl></div>
+      </div>
     </section>
 
     <div class="dicas"><span><span class="g">A</span>Instalar</span><span><span class="g">B</span>Voltar</span></div>
@@ -152,36 +196,48 @@ const RAW = "https://raw.githubusercontent.com/AurelioB/BanjoRecomp-Android/andr
 const JOGOS = {
   banjo: {
     titulo: "Banjo-Kazooie", meta: "BanjoRecomp-Android · Nintendo 64",
-    sobre: "Port Android do Banjo-Kazooie feito com o N64: Recompiled.",
+    sobre: "Port Android do Banjo-Kazooie feito com o N64: Recompiled. Roda nativo, em widescreen e com taxa de quadros alta.",
+    ficha: [["Versão", "android-v0.1.1"], ["Tamanho", "8 MB"], ["Projeto", "AurelioB/BanjoRecomp-Android"]],
     imagens: [
-      { url: RAW + "gruntildas-lair-primary.png", fonte: "README", larga: true },
-      { url: RAW + "mumbos-mountain-primary.png", fonte: "README", larga: true },
-      { url: lib("Nintendo - Nintendo 64", "Named_Snaps", "Banjo-Kazooie (USA)"), fonte: "Captura" },
+      { url: RAW + "gruntildas-lair-primary.png", fonte: "Port" },
+      { url: RAW + "mumbos-mountain-primary.png", fonte: "Port" },
+      { url: RAW + "slot-select-primary.png", fonte: "Port" },
+      { url: lib("Nintendo - Nintendo 64", "Named_Snaps", "Banjo-Kazooie (USA)"), fonte: "Gameplay" },
+      { url: RAW + "main-menu-primary.png", fonte: "Port" },
       { url: lib("Nintendo - Nintendo 64", "Named_Titles", "Banjo-Kazooie (USA)"), fonte: "Título" },
-      { url: RAW + "main-menu-primary.png", fonte: "README", larga: true },
-      { url: lib("Nintendo - Nintendo 64", "Named_Boxarts", "Banjo-Kazooie (USA)"), fonte: "Caixa", contem: true },
     ],
   },
   pokemon: {
     titulo: "Pokemon Gold / Silver / Crystal", meta: "Gen2Recomped · Game Boy Color",
-    sobre: "Recriação nativa de Pokémon Gold, Silver e Crystal em LÖVE2D, a partir do seu cartucho.",
+    sobre: "Recriação nativa de Pokémon Gold, Silver e Crystal em LÖVE2D, a partir do seu cartucho. Também importa jogos de GBA e DS.",
+    ficha: [["Versão", "0.8.47"], ["Tamanho", "—"], ["Projeto", "UNDERdecoded/Gen2Recomped"]],
     imagens: [
-      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Captura" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Gameplay" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Gameplay" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Crystal Version (USA)"), fonte: "Gameplay" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Crystal Version (USA, Europe) (Rev 1)"), fonte: "Gameplay" },
       { url: lib("Nintendo - Game Boy Color", "Named_Titles", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Título" },
-      { url: lib("Nintendo - Game Boy Color", "Named_Boxarts", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Caixa", contem: true },
-      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Captura" },
-      { url: lib("Nintendo - Game Boy Color", "Named_Titles", "Pokemon - Crystal Version (USA, Europe) (Rev 1)"), fonte: "Título" },
     ],
   },
 };
 
 const tela = document.getElementById("tela");
-let jogo = JOGOS.banjo, foco = 0, slide = 0, camadaAtiva = 0, timer;
+let jogo = JOGOS.banjo, foco = 0, slide = 0, camadaAtiva = 0, timer, abaAtual = "galeria";
+const ABAS = ["galeria", "sobre", "ficha"];
+function mostrarAba(a) {
+  abaAtual = a;
+  tela.querySelectorAll("[data-aba]").forEach((x) => x.classList.toggle("atual", x.dataset.aba === a));
+  tela.querySelectorAll("[data-painel]").forEach((x) => x.classList.toggle("mostrar", x.dataset.painel === a));
+}
 
 function desenhar() {
   tela.querySelector("[data-titulo]").textContent = jogo.titulo;
   tela.querySelector("[data-meta]").textContent = jogo.meta;
   tela.querySelector("[data-sobre]").textContent = jogo.sobre;
+  tela.querySelectorAll("[data-sobre-txt]").forEach((e) => (e.textContent = jogo.sobre));
+  tela.querySelectorAll("[data-ficha-dl]").forEach((e) => (e.innerHTML = jogo.ficha.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")));
+  tela.querySelector("[data-ficha-linha]").innerHTML = jogo.ficha.map(([, v]) => `<b>${v}</b>`).join(" · ");
+  mostrarAba(abaAtual);
   tela.querySelector("[data-miniaturas]").innerHTML = jogo.imagens.map((im, i) =>
     `<div class="mini${im.contem ? " contem" : ""}${i === foco ? " focado" : ""}" data-i="${i}" style="background-image:url('${im.url}')"><span class="fonte">${im.fonte}</span></div>`).join("");
   tela.querySelectorAll(".mini").forEach((m) => {
@@ -228,8 +284,14 @@ addEventListener("keydown", (e) => {
     e.preventDefault();
   }
   if (e.key === "Enter") abrirCheia();
+  /* I3: Q/E fazem o papel de L2/R2 */
+  if ((e.key === "q" || e.key === "e") && tela.dataset.infos === "abas") mostrarAba(ABAS[(ABAS.indexOf(abaAtual) + (e.key === "e" ? 1 : 2)) % 3]);
+  /* I2: ↓ desce a coluna até as infos */
+  if (e.key === "ArrowDown" && tela.dataset.infos === "baixo") { tela.querySelector(".galeria").scrollBy({ top: 220, behavior: "smooth" }); e.preventDefault(); }
+  if (e.key === "ArrowUp" && tela.dataset.infos === "baixo") { tela.querySelector(".galeria").scrollBy({ top: -220, behavior: "smooth" }); e.preventDefault(); }
   if (e.key === "Escape") tela.querySelector("[data-cheia]").classList.remove("aberta");
 });
+tela.querySelectorAll("[data-aba]").forEach((x) => (x.onclick = () => mostrarAba(x.dataset.aba)));
 tela.querySelector("[data-cheia]").onclick = () => tela.querySelector("[data-cheia]").classList.remove("aberta");
 
 document.querySelectorAll(".grupo").forEach((g) => g.querySelectorAll("button").forEach((b) => b.onclick = () => {
