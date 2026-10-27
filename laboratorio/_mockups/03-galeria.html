@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detalhes · galeria e fundo (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Tokens do Hydra (os mesmos do lab: comum/tema.css) */
+  :root { --fundo:#121212; --escuro:#0d0d0d; --claro:#f0f1f7; --texto:#d0d1d7; --texto-2:#a4a5ad;
+          --borda:rgba(255,255,255,.08); --borda-forte:rgba(255,255,255,.22); --teal:#16b195; --ok:#5fe39a; --raio:8px; }
+  * { box-sizing:border-box }
+  body { margin:0; background:#070707; color:var(--texto); font:14px "Noto Sans",sans-serif; }
+  main { padding:24px 20px 48px; display:flex; flex-direction:column; align-items:center; gap:16px }
+  h1 { margin:0; font-size:20px; color:var(--claro) }
+  .sub { margin:0; color:var(--texto-2); max-width:915px; line-height:1.5; text-align:center }
+
+  /* controles do mockup (fora do aparelho) */
+  .opcoes { display:flex; flex-wrap:wrap; gap:18px; justify-content:center }
+  .grupo { display:flex; gap:6px; align-items:center }
+  .grupo > span { color:var(--texto-2); font-size:12.5px; margin-right:4px }
+  .grupo button { font:600 12.5px "Noto Sans",sans-serif; color:var(--texto); background:none; border:1px solid var(--borda-forte);
+                  border-radius:var(--raio); padding:7px 12px; cursor:pointer }
+  .grupo button[aria-pressed="true"] { background:var(--claro); color:#121212; border-color:var(--claro) }
+
+  /* aparelho: Odin 2 deitado, 960×540 dp */
+  .tela { position:relative; width:960px; height:540px; border-radius:26px; outline:8px solid #1d1d1d; overflow:hidden; background:var(--fundo) }
+
+  /* ---------- fundo ---------- */
+  .fundo, .fundo .camada { position:absolute; inset:0 }
+  .fundo .camada { background-size:cover; background-position:center; opacity:0; transition:opacity 1.2s ease; image-rendering:auto }
+  .fundo .camada.visivel { opacity:1 }
+  /* A · slideshow com zoom lento */
+  [data-fundo="slideshow"] .fundo .camada.visivel { animation:kenburns 7s ease-in-out forwards }
+  @keyframes kenburns { from { transform:scale(1.04) translate(0,0) } to { transform:scale(1.14) translate(-2%,-1.5%) } }
+  /* B · espelho: a imagem em foco na galeria, grande e desfocada */
+  [data-fundo="espelho"] .fundo .camada { filter:blur(18px) saturate(1.2); transform:scale(1.15) }
+  .veu { position:absolute; inset:0;
+         background: linear-gradient(90deg, rgba(18,18,18,.95) 30%, rgba(18,18,18,.55) 52%, rgba(18,18,18,.15)),
+                     linear-gradient(0deg, rgba(18,18,18,.92) 4%, transparent 40%) }
+
+  /* ---------- coluna da ação ---------- */
+  .acao { position:absolute; left:40px; top:40px; width:400px; z-index:2 }
+  .titulo { margin:0; font-size:32px; font-weight:700; color:#fff; line-height:1.05 }
+  .meta { margin-top:6px; color:#e6e7ec; font-size:14px }
+  .estado { margin-top:10px; display:flex; gap:8px; align-items:center; font-weight:600; font-size:14px; color:var(--texto) }
+  .estado i { font-style:normal; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; background:rgba(0,0,0,.55); font-size:12px }
+  .estado.ok { color:var(--ok) }
+  .botoes { margin-top:14px; display:flex; gap:8px }
+  .btn { height:42px; border-radius:var(--raio); padding:0 16px; display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:14px }
+  .btn.primario { background:var(--claro); color:#121212; outline:3px solid var(--claro); outline-offset:3px }
+  .btn.contorno { border:1px solid var(--borda-forte); color:var(--claro); background:rgba(0,0,0,.35) }
+  .g { width:20px; height:20px; border-radius:50%; display:inline-grid; place-items:center; font-size:11px; font-weight:700; background:#121212; color:var(--claro) }
+  .btn.contorno .g { background:var(--claro); color:#121212 }
+  .precisa { margin-top:18px }
+  .rotulo { font-size:11.5px; letter-spacing:.8px; text-transform:uppercase; color:var(--texto-2); margin-bottom:6px }
+  .item { display:flex; gap:10px; align-items:center; padding:4px 0; color:var(--claro); font-weight:600 }
+  .item i { font-style:normal; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.06); font-size:11px; color:var(--ok) }
+  .item i.n { color:var(--texto) }
+
+  /* ---------- galeria ---------- */
+  .galeria { position:absolute; z-index:2 }
+  .miniaturas { display:flex; gap:10px }
+  .mini { position:relative; flex:none; border-radius:6px; overflow:hidden; background:#1b1b1b center/cover no-repeat; box-shadow:0 0 10px #000; cursor:pointer;
+          transition:transform .12s, outline-color .12s; outline:3px solid transparent; outline-offset:3px }
+  .mini.focado { outline-color:var(--claro); transform:translateY(-3px) }
+  .mini.contem { background-size:contain; background-color:#0b0b0b }
+  .mini .fonte { position:absolute; left:6px; bottom:5px; font-size:10.5px; font-weight:600; color:#fff; background:rgba(0,0,0,.6); padding:1px 5px; border-radius:4px }
+
+  /* G1 · visor grande + faixa de miniaturas (coluna da direita, tipo página de loja) */
+  [data-galeria="visor"] .galeria { right:40px; top:40px; width:440px }
+  [data-galeria="visor"] .visor { width:440px; height:248px; border-radius:var(--raio); background:#0b0b0b center/contain no-repeat; box-shadow:0 0 18px #000; border:1px solid var(--borda); image-rendering:pixelated }
+  [data-galeria="visor"] .miniaturas { margin-top:10px }
+  [data-galeria="visor"] .mini { width:64px; height:44px }
+  [data-galeria="visor"] .miniaturas { gap:11px }
+  [data-galeria="visor"] .sobre-faixa { display:none }
+  /* G2 · faixa larga embaixo, informação em cima à direita */
+  [data-galeria="faixa"] .visor { display:none }
+  [data-galeria="faixa"] .galeria { left:40px; right:40px; bottom:48px }
+  [data-galeria="faixa"] .mini { width:150px; height:92px }
+  [data-galeria="faixa"] .acao .precisa { display:none }
+  [data-galeria="faixa"] .sobre-faixa { position:absolute; z-index:2; right:40px; top:40px; width:400px; padding:12px 14px; border-radius:var(--raio);
+                                         background:rgba(13,13,13,.72); border:1px solid var(--borda); line-height:1.5 }
+
+  .dicas { position:absolute; z-index:3; right:40px; bottom:12px; display:flex; gap:16px; font-size:12.5px; color:var(--texto-2) }
+  .dicas span { display:inline-flex; gap:6px; align-items:center }
+  .dicas .g { background:#2d2d2d }
+
+  /* visor em tela cheia (A numa miniatura) */
+  .cheia { position:absolute; inset:0; z-index:10; background:rgba(0,0,0,.94); display:none; align-items:center; justify-content:center }
+  .cheia.aberta { display:flex }
+  .cheia-img { width:86%; height:82%; background:center/contain no-repeat; image-rendering:pixelated }
+  .cheia .legenda { position:absolute; bottom:16px; left:0; right:0; text-align:center; font-size:12.5px; color:var(--texto-2) }
+  .cheia .seta { position:absolute; top:50%; transform:translateY(-50%); font-size:34px; color:var(--claro); opacity:.7 }
+  .cheia .seta.esq { left:24px } .cheia .seta.dir { right:24px }
+
+  .nota { color:var(--texto-2); font-size:12.5px; max-width:915px; line-height:1.55 }
+  .nota b { color:var(--texto) }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Detalhes · galeria e fundo</h1>
+  <p class="sub">Imagens reais: a caixa, a tela de título e uma captura vêm do libretro-thumbnails. No Banjo, as capturas do port rodando no Android vêm do README do projeto. Use as setas ← → (ou clique) pra andar na galeria, Enter abre em tela cheia e Esc fecha.</p>
+
+  <div class="opcoes">
+    <div class="grupo" data-op="jogo"><span>Jogo</span><button data-v="banjo" aria-pressed="true">Banjo-Kazooie</button><button data-v="pokemon">Pokémon Silver</button></div>
+    <div class="grupo" data-op="fundo"><span>Fundo</span><button data-v="slideshow" aria-pressed="true">A · Imagens passando, com zoom lento</button><button data-v="espelho">B · Espelho da imagem em foco</button></div>
+    <div class="grupo" data-op="galeria"><span>Galeria</span><button data-v="visor" aria-pressed="true">1 · Visor grande + miniaturas</button><button data-v="faixa">2 · Faixa larga embaixo</button></div>
+  </div>
+
+  <div class="tela" id="tela" data-fundo="slideshow" data-galeria="visor">
+    <div class="fundo"><div class="camada" data-c="0"></div><div class="camada" data-c="1"></div></div>
+    <div class="veu"></div>
+
+    <section class="acao">
+      <h2 class="titulo" data-titulo></h2>
+      <div class="meta" data-meta></div>
+      <div class="estado"><i>+</i>Ainda não instalado</div>
+      <div class="botoes">
+        <span class="btn primario"><span class="g">A</span>Instalar</span>
+        <span class="btn contorno">GitHub ↗</span>
+      </div>
+      <div class="precisa">
+        <div class="rotulo">O que o port precisa</div>
+        <div class="item"><i class="n">+</i>Port não instalado</div>
+        <div class="item"><i>✓</i>Roda neste aparelho</div>
+      </div>
+    </section>
+
+    <div class="sobre-faixa" data-sobre></div>
+
+    <section class="galeria">
+      <div class="visor" data-visor></div>
+      <div class="miniaturas" data-miniaturas></div>
+    </section>
+
+    <div class="dicas"><span><span class="g">A</span>Instalar</span><span><span class="g">B</span>Voltar</span></div>
+
+    <div class="cheia" data-cheia><span class="seta esq">‹</span><div class="cheia-img" data-cheia-img role="img" aria-label="Imagem da galeria"></div><span class="seta dir">›</span><div class="legenda" data-cheia-legenda></div></div>
+  </div>
+
+  <p class="nota"><b>O que não entrou:</b> clipe em vídeo. Nenhum dos READMEs que verifiquei tem vídeo ou GIF, e não existe uma fonte aberta de vídeo de jogo. Se um README tiver GIF, ele toca no lugar da imagem, e é o mais perto de um clipe que dá pra ter sem catalogar à mão.</p>
+</main>
+
+<script>
+const L = "https://thumbnails.libretro.com/";
+const lib = (sys, tipo, nome) => L + encodeURIComponent(sys) + "/" + tipo + "/" + encodeURIComponent(nome) + ".png";
+const RAW = "https://raw.githubusercontent.com/AurelioB/BanjoRecomp-Android/android/docs/assets/android-dual-screen/";
+const JOGOS = {
+  banjo: {
+    titulo: "Banjo-Kazooie", meta: "BanjoRecomp-Android · Nintendo 64",
+    sobre: "Port Android do Banjo-Kazooie feito com o N64: Recompiled.",
+    imagens: [
+      { url: RAW + "gruntildas-lair-primary.png", fonte: "README", larga: true },
+      { url: RAW + "mumbos-mountain-primary.png", fonte: "README", larga: true },
+      { url: lib("Nintendo - Nintendo 64", "Named_Snaps", "Banjo-Kazooie (USA)"), fonte: "Captura" },
+      { url: lib("Nintendo - Nintendo 64", "Named_Titles", "Banjo-Kazooie (USA)"), fonte: "Título" },
+      { url: RAW + "main-menu-primary.png", fonte: "README", larga: true },
+      { url: lib("Nintendo - Nintendo 64", "Named_Boxarts", "Banjo-Kazooie (USA)"), fonte: "Caixa", contem: true },
+    ],
+  },
+  pokemon: {
+    titulo: "Pokemon Gold / Silver / Crystal", meta: "Gen2Recomped · Game Boy Color",
+    sobre: "Recriação nativa de Pokémon Gold, Silver e Crystal em LÖVE2D, a partir do seu cartucho.",
+    imagens: [
+      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Captura" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Titles", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Título" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Boxarts", "Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Caixa", contem: true },
+      { url: lib("Nintendo - Game Boy Color", "Named_Snaps", "Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), fonte: "Captura" },
+      { url: lib("Nintendo - Game Boy Color", "Named_Titles", "Pokemon - Crystal Version (USA, Europe) (Rev 1)"), fonte: "Título" },
+    ],
+  },
+};
+
+const tela = document.getElementById("tela");
+let jogo = JOGOS.banjo, foco = 0, slide = 0, camadaAtiva = 0, timer;
+
+function desenhar() {
+  tela.querySelector("[data-titulo]").textContent = jogo.titulo;
+  tela.querySelector("[data-meta]").textContent = jogo.meta;
+  tela.querySelector("[data-sobre]").textContent = jogo.sobre;
+  tela.querySelector("[data-miniaturas]").innerHTML = jogo.imagens.map((im, i) =>
+    `<div class="mini${im.contem ? " contem" : ""}${i === foco ? " focado" : ""}" data-i="${i}" style="background-image:url('${im.url}')"><span class="fonte">${im.fonte}</span></div>`).join("");
+  tela.querySelectorAll(".mini").forEach((m) => {
+    m.onclick = () => { foco = +m.dataset.i; desenhar(); trocarFundo(jogo.imagens[foco].url); };
+    m.ondblclick = () => abrirCheia();
+  });
+  tela.querySelector("[data-visor]").style.backgroundImage = `url('${jogo.imagens[foco].url}')`;
+}
+
+function trocarFundo(url) {
+  const prox = 1 - camadaAtiva;
+  const el = tela.querySelector(`.camada[data-c="${prox}"]`);
+  el.style.backgroundImage = `url('${url}')`;
+  el.classList.remove("visivel"); void el.offsetWidth; el.classList.add("visivel");
+  tela.querySelector(`.camada[data-c="${camadaAtiva}"]`).classList.remove("visivel");
+  camadaAtiva = prox;
+}
+
+/* A: as imagens passam sozinhas (só as largas, capa fica de fora do fundo) */
+function iniciarSlideshow() {
+  clearInterval(timer);
+  const fundos = jogo.imagens.filter((im) => !im.contem);
+  slide = 0; trocarFundo(fundos[0].url);
+  timer = setInterval(() => { slide = (slide + 1) % fundos.length; trocarFundo(fundos[slide].url); }, 6000);
+}
+/* B: o fundo espelha a imagem em foco na galeria */
+function iniciarEspelho() { clearInterval(timer); trocarFundo(jogo.imagens[foco].url); }
+const iniciarFundo = () => (tela.dataset.fundo === "slideshow" ? iniciarSlideshow() : iniciarEspelho());
+
+function abrirCheia() {
+  const c = tela.querySelector("[data-cheia]");
+  c.querySelector("[data-cheia-img]").style.backgroundImage = `url('${jogo.imagens[foco].url}')`;
+  c.querySelector("[data-cheia-legenda]").textContent = `${foco + 1} de ${jogo.imagens.length} · ${jogo.imagens[foco].fonte}`;
+  c.classList.add("aberta");
+}
+const cheiaAberta = () => tela.querySelector("[data-cheia]").classList.contains("aberta");
+
+addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    foco = (foco + (e.key === "ArrowRight" ? 1 : -1) + jogo.imagens.length) % jogo.imagens.length;
+    desenhar();
+    if (cheiaAberta()) abrirCheia();
+    if (tela.dataset.fundo === "espelho") trocarFundo(jogo.imagens[foco].url);
+    e.preventDefault();
+  }
+  if (e.key === "Enter") abrirCheia();
+  if (e.key === "Escape") tela.querySelector("[data-cheia]").classList.remove("aberta");
+});
+tela.querySelector("[data-cheia]").onclick = () => tela.querySelector("[data-cheia]").classList.remove("aberta");
+
+document.querySelectorAll(".grupo").forEach((g) => g.querySelectorAll("button").forEach((b) => b.onclick = () => {
+  g.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  const op = g.dataset.op, v = b.dataset.v;
+  if (op === "jogo") { jogo = JOGOS[v]; foco = 0; desenhar(); iniciarFundo(); }
+  else { tela.dataset[op] = v; if (op === "fundo") iniciarFundo(); }
+}));
+
+desenhar(); iniciarFundo();
+</script>
+</body>
+</html>
