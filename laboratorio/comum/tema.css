@@ -1,0 +1,197 @@
+/* TEMA — o visual do Hydra (src/renderer/src/scss/globals.scss do fork)
+   aplicado a uma tela de celular. Os nomes dos tokens ficam; os valores vêm
+   do Hydra. */
+:root {
+  --fundo: #121212;
+  --fundo-escuro: #0d0d0d;
+  --fundo-elevado: #1a1a1a;
+  --claro: #f0f1f7;          /* $muted-color: botões e títulos */
+  --texto: #d0d1d7;          /* $body-color */
+  --texto-2: #a4a5ad;        /* secundário, ainda AA sobre #121212 */
+  --borda: rgba(255, 255, 255, 0.08);
+  --borda-forte: rgba(255, 255, 255, 0.22);
+  --teal: #16b195;           /* $brand-teal: o único acento */
+  --teal-claro: #7fd8c6;
+  --ok: #5fe39a;
+  --aviso: #ffc107;
+  --ruim: #ff7a8a;
+  --raio: 8px;
+  --u: 8px;                  /* $spacing-unit */
+  --fonte: "Noto Sans", sans-serif;
+  --corpo: 14px;             /* $body-font-size */
+  --dica: 13px;
+  --pequeno: 12px;
+  --rapido: 120ms;
+  --medio: 220ms;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: #070707;
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: var(--corpo);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+/* ------------------------------------------------------------ palco do lab
+   Deitado: uma tela de 915×412 (celular 20:9 deitado, em dp) centralizada e
+   escalada pra caber. Em pé (≤ 767 px, que é o visor Mobile do painel): a
+   tela ocupa a janela inteira. */
+.palco { min-height: 100%; display: grid; place-items: center; padding: 24px 16px 56px; }
+.tela {
+  position: relative;
+  width: 915px; height: 412px;
+  border-radius: 28px;
+  outline: 8px solid #1d1d1d;
+  background: var(--fundo);
+  overflow: hidden;
+  zoom: var(--escala, 1);
+}
+.legenda-lab {
+  margin-top: 18px; font-size: 12px; color: var(--texto-2);
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 915px;
+}
+.legenda-lab kbd { font: 600 11px var(--fonte); color: var(--claro); background: #222; border: 1px solid #333; border-radius: 4px; padding: 1px 5px; }
+
+@media (max-width: 767px) {
+  .palco { padding: 0; display: block; }
+  .tela { width: 100vw; height: 100dvh; border-radius: 0; outline: 0; zoom: 1; }
+  .legenda-lab { display: none; }
+}
+
+/* ------------------------------------------------------------ arte do jogo
+   Sem imagem real no lab: gradiente com a cor do jogo. O port sem arte usa
+   as iniciais (P-08). */
+.arte { background: radial-gradient(circle at 72% 32%, var(--c1), var(--c2) 48%, var(--c3)); }
+.arte.sem { background: #1b1b1b; display: grid; place-items: center; color: var(--texto-2); font-weight: 700; letter-spacing: .5px; }
+
+/* ------------------------------------------------------------ foco e seleção
+   Foco: contorno claro grosso (P-15). Seleção: preenchido ou sublinhado
+   (P-16). Nunca só cor. */
+[data-foco] { outline: 0; transition: outline-color var(--rapido), transform var(--rapido), background-color var(--rapido); }
+.focado { outline: 3px solid var(--claro) !important; outline-offset: 3px; }
+html[data-entrada="toque"] .focado { outline-color: transparent !important; }
+
+/* ------------------------------------------------------------ botões (button.scss do Hydra) */
+.btn {
+  height: 40px; min-width: 40px; padding: 0 var(--u) 0 var(--u);
+  padding-inline: calc(var(--u) * 2);
+  border-radius: var(--raio); border: 1px solid transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--u);
+  font-weight: 600; font-size: var(--corpo); white-space: nowrap;
+}
+.btn.primario { background: var(--claro); color: #121212; }
+.btn.contorno { border-color: var(--borda-forte); color: var(--claro); background: rgba(0, 0, 0, .35); }
+.btn.escuro { background: var(--fundo-escuro); color: var(--claro); }
+.btn.primario .g { background: #121212; color: var(--claro); }
+
+/* ------------------------------------------------------------ botões do controle (P-23)
+   O desenho depende da entrada em uso: Xbox, PlayStation ou toque (some). */
+.g {
+  display: inline-grid; place-items: center; flex: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--claro); color: #121212;
+  font: 700 11px var(--fonte); line-height: 1;
+}
+.g.ombro { width: auto; padding: 0 6px; border-radius: 5px; height: 18px; font-size: 10.5px; background: #3a3a3a; color: var(--claro); }
+.g::before { content: attr(data-b); }
+.g[data-b="a"]::before { content: "A"; }
+.g[data-b="b"]::before { content: "B"; }
+.g[data-b="x"]::before { content: "X"; }
+.g[data-b="y"]::before { content: "Y"; }
+.g[data-b="l1"]::before { content: "LB"; }
+.g[data-b="r1"]::before { content: "RB"; }
+.g[data-b="menu"]::before { content: "☰"; }
+html[data-entrada="ps"] .g[data-b="a"]::before { content: "✕"; }
+html[data-entrada="ps"] .g[data-b="b"]::before { content: "○"; }
+html[data-entrada="ps"] .g[data-b="x"]::before { content: "□"; }
+html[data-entrada="ps"] .g[data-b="y"]::before { content: "△"; }
+html[data-entrada="ps"] .g[data-b="l1"]::before { content: "L1"; }
+html[data-entrada="ps"] .g[data-b="r1"]::before { content: "R1"; }
+html[data-entrada="ps"] .g[data-b="menu"]::before { content: "≡"; }
+html[data-entrada="toque"] .g { display: none; }
+
+/* ------------------------------------------------------------ topo: seções com L1/R1 */
+.topo {
+  position: absolute; z-index: 5; top: 0; left: 0; right: 0; height: 44px;
+  display: flex; align-items: center; gap: 18px; padding: 0 26px;
+}
+.topo .secoes { display: flex; align-items: center; gap: 18px; }
+.topo .secao {
+  font-size: 14px; font-weight: 500; color: var(--texto-2);
+  padding: 6px 0 5px; border-bottom: 2px solid transparent;
+}
+.topo .secao.atual { color: var(--claro); border-color: var(--claro); }
+.topo .relogio { margin-left: auto; font-size: 12px; color: var(--texto-2); display: flex; gap: 10px; align-items: center; }
+html[data-entrada="toque"] .topo .secao { padding: 10px 2px 9px; }
+
+/* ------------------------------------------------------------ dicas de botões (rodapé) */
+.dicas {
+  position: absolute; z-index: 5; right: 22px; bottom: 10px;
+  display: flex; gap: 16px; align-items: center; font-size: 12.5px; color: var(--texto-2);
+}
+.dicas span { display: inline-flex; gap: 6px; align-items: center; }
+.dicas .g { background: #2d2d2d; color: var(--claro); }
+html[data-entrada="toque"] .dicas { display: none; }
+
+/* ------------------------------------------------------------ estado (P-25, P-26, P-42) */
+.estado { display: inline-flex; gap: 7px; align-items: center; font-weight: 600; font-size: var(--dica); }
+.estado .s { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.55); }
+.estado.ok { color: var(--ok); } .estado.dl { color: var(--teal-claro); } .estado.warn { color: var(--aviso); }
+.estado.bad { color: var(--ruim); } .estado.neutro { color: var(--texto); }
+
+/* selo na capa: símbolo + (quando cabe) palavra */
+.selo {
+  position: absolute; right: 6px; bottom: 6px; z-index: 2;
+  height: 20px; min-width: 20px; padding: 0 6px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 11px; font-weight: 700; background: rgba(0,0,0,.78);
+}
+.selo.ok { color: var(--ok); } .selo.dl { color: var(--teal-claro); } .selo.warn { color: var(--aviso); }
+.selo.bad { color: var(--ruim); } .selo.neutro { color: var(--texto); }
+.barra { height: 3px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; }
+.barra i { display: block; height: 100%; background: var(--teal); }
+
+/* ------------------------------------------------------------ painel lateral (Opções ☰) — P-40 */
+.camada-fundo { position: absolute; inset: 0; z-index: 20; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity var(--medio); }
+.lateral {
+  position: absolute; z-index: 21; top: 0; right: 0; bottom: 0; width: 300px;
+  background: #181818; border-left: 1px solid var(--borda); padding: 18px 0 0;
+  transform: translateX(100%); transition: transform var(--medio) cubic-bezier(.2,.7,.2,1);
+  display: flex; flex-direction: column;
+}
+.lateral.aberta { transform: none; }
+.lateral.aberta ~ .camada-fundo, .camada-fundo.aberta { opacity: 1; pointer-events: auto; }
+.lateral .de { font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--texto-2); padding: 0 22px; display: flex; gap: 6px; align-items: center; }
+.lateral h3 { margin: 4px 22px 14px; color: var(--claro); font-size: 16px; }
+.lateral .opcao {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  width: 100%; text-align: left; padding: 11px 22px; font-size: 14px; color: var(--texto);
+}
+.lateral .opcao small { color: var(--texto-2); font-size: 12px; }
+.lateral .opcao.focado { outline: 0 !important; background: rgba(255,255,255,.08); color: var(--claro); box-shadow: inset 3px 0 0 var(--claro); }
+.lateral .opcao.perigo { color: var(--ruim); }
+.lateral .rodape { margin-top: auto; padding: 12px 22px; font-size: 12.5px; color: var(--texto-2); display: flex; gap: 6px; align-items: center; border-top: 1px solid var(--borda); }
+.lateral .rodape .g { background: #2d2d2d; color: var(--claro); }
+.lateral .fechar-toque { display: none; }
+html[data-entrada="toque"] .lateral .fechar-toque { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+}
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.arte.sem::after { content: attr(data-iniciais); }
+/* no lab não há capa real: o nome do jogo desenhado na "arte" faz o papel do
+   logo da capa, pra dar pra reconhecer o jogo */
+.arte[data-logo]::after {
+  content: attr(data-logo); position: absolute; inset: 0; display: grid; place-items: center;
+  padding: 10%; text-align: center; font-weight: 800; letter-spacing: .5px; line-height: 1.05;
+  color: rgba(255,255,255,.88); text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  font-size: var(--logo-tam, 13px);
+}
+.fundo.arte[data-logo]::after, .hero-arte.arte[data-logo]::after { content: none; }

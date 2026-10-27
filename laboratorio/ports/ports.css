@@ -1,0 +1,78 @@
+/* PORTS — deitado (915×412) */
+
+.ports .filtros {
+  position: absolute; z-index: 4; top: 46px; left: 0; right: 0;
+  display: flex; gap: 8px; align-items: center; padding: 4px 26px;
+}
+.ports .espaco { flex: 1; }
+.chip {
+  height: 32px; padding: 0 12px; border-radius: var(--raio);
+  border: 1px solid var(--borda); color: var(--texto); font-size: 13px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.chip .n { color: var(--texto-2); font-size: 12px; }
+.chip[aria-pressed="true"] { background: var(--claro); color: #121212; font-weight: 600; border-color: var(--claro); }
+.chip[aria-pressed="true"] .n { color: #4a4b52; }
+.chip.leve { border-color: transparent; color: var(--texto-2); }
+.chip.leve b { color: var(--texto); font-weight: 600; }
+
+.ports .grade-caixa {
+  position: absolute; top: 92px; left: 0; right: 0; bottom: 52px;
+  overflow-y: auto; scrollbar-width: none; padding: 8px 26px 16px;
+}
+.ports .grade-caixa::-webkit-scrollbar { display: none; }
+.ports .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; }
+.ports .busca-ativa { font-size: 13px; color: var(--texto-2); margin: 0 0 10px; }
+.ports .vazio { color: var(--texto-2); display: flex; gap: 12px; align-items: center; }
+
+/* capa vertical (vertical-cover-card do Hydra) */
+.vcapa { position: relative; aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; box-shadow: 0 0 10px #000; }
+.vcapa-arte { position: absolute; inset: 0; }
+.vcapa .arte.sem::after { content: none; }
+.vcapa-titulo {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 10px;
+  text-align: center; font-size: 13px; font-weight: 700; color: var(--texto); line-height: 1.25;
+}
+.vcapa-barra { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0; }
+.vcapa.focado { transform: translateY(-3px); }
+
+/* faixa de contexto: o que está em foco */
+.ports .contexto {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; height: 52px;
+  display: flex; align-items: center; gap: 18px; padding: 0 26px;
+  background: var(--fundo-escuro); border-top: 1px solid var(--borda);
+}
+.ports .ctx-titulo { display: flex; flex-direction: column; min-width: 0; }
+.ports .ctx-titulo b { color: var(--claro); font-size: 14px; }
+.ports .ctx-titulo span { color: var(--texto-2); font-size: 12px; }
+.ports .dicas { bottom: 15px; }
+html[data-entrada="toque"] .ports .contexto { display: none; }
+html[data-entrada="toque"] .ports .grade-caixa { bottom: 0; }
+
+/* teclado na tela */
+.teclado {
+  position: absolute; z-index: 30; inset: 0; background: rgba(10,10,10,.96);
+  display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+}
+.teclado.aberta { display: flex; }
+.teclado .campo {
+  width: 520px; height: 42px; border-radius: var(--raio); border: 1px solid var(--borda-forte);
+  background: var(--fundo-escuro); display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  color: var(--claro); font-size: 15px;
+}
+.teclado .campo .lupa { color: var(--texto-2); }
+.teclado .cursor { width: 2px; height: 20px; background: var(--teal); margin-left: -8px; animation: piscar 1s steps(1) infinite; }
+@keyframes piscar { 50% { opacity: 0; } }
+.teclado .teclas { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.teclado .linha { display: flex; gap: 6px; }
+.tecla { width: 44px; height: 38px; border-radius: 6px; background: #222; color: var(--claro); font-weight: 600; font-size: 14px; }
+.tecla.larga { width: 120px; font-size: 13px; }
+.tecla.ok { background: var(--claro); color: #121212; }
+.tecla.focado { background: #3a3a3a; }
+.tecla.ok.focado { background: #fff; }
+.teclado-dicas { font-size: 12.5px; color: var(--texto-2); display: flex; gap: 6px; align-items: center; }
+.teclado-dicas .g { background: #2d2d2d; color: var(--claro); }
+
+/* variação: capas horizontais */
+html[data-capas="horizontal"] .ports .grade { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+html[data-capas="horizontal"] .vcapa { aspect-ratio: 16 / 9; }
