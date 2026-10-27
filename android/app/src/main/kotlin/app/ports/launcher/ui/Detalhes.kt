@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.ports.core.Estado
+import app.ports.core.Plataformas
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
 import app.ports.core.Titulo
@@ -154,6 +155,7 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
                     Ficha("Versão", pt.versaoInstalada ?: p.versaoMaisNova ?: "—")
                     if (p.tamanho.isNotBlank()) Ficha("Tamanho", p.tamanho)
                     Ficha("Projeto", p.repo)
+                    if (p.aiFlag) Ficha("Feito com IA", "Sim")
                 }
             }
         }
@@ -174,9 +176,9 @@ private fun abrirGithub(contexto: Context, repo: String) {
     }
 }
 
-/** Nome da plataforma pra mostrar, ou nulo quando o catálogo não sabe (`other`). */
+/** Nome da plataforma pra mostrar, ou nulo quando o catálogo não sabe (Outros). */
 private fun plataformaMostrada(plataforma: String): String? =
-    plataforma.takeIf { it.isNotBlank() && !it.equals("other", ignoreCase = true) && !it.equals("unknown", ignoreCase = true) }
+    plataforma.takeIf { it.isNotBlank() && it != Plataformas.OUTROS }
 
 /** Só fatos que o app sabe de verdade: instalado, versão nova, roda aqui. */
 @Composable

@@ -71,6 +71,7 @@ class LibretroTest {
         assertEquals("Nintendo - Nintendo 64", Libretro.sistemaDe("Nintendo 64"))
         assertEquals("Sega - Mega Drive - Genesis", Libretro.sistemaDe("Mega Drive"))
         assertNull(Libretro.sistemaDe("Outros"))
+        assertNull(Libretro.sistemaDe("PC"))
     }
 
     @Test fun `endereco do png codifica o sistema e o nome`() {

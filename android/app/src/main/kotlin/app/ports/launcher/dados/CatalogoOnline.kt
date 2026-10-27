@@ -6,6 +6,7 @@ import app.ports.core.Plataformas
 import app.ports.core.Port
 import app.ports.core.Titulo
 import app.ports.core.Validade
+import app.ports.launcher.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -28,6 +29,8 @@ class CatalogoOnline(private val contexto: Context) {
      * Sem rede, cai no cache. Sem cache e sem rede, lança IOException.
      */
     suspend fun carregar(forcar: Boolean = false): Resultado = withContext(Dispatchers.IO) {
+        // só debug: um catálogo de teste na pasta do app substitui o da rede (sem gravar cache)
+        arquivoDeTeste()?.let { return@withContext ler(it.readText(), doCache = false) }
         val agora = System.currentTimeMillis()
         val cache = if (arquivo.exists()) arquivo.readText() else null
         val buscadoEm = prefs.getLong(CHAVE_BUSCA, 0L)
@@ -51,6 +54,10 @@ class CatalogoOnline(private val contexto: Context) {
             recorrerAoCache(cache, e)
         }
     }
+
+    /** `ports-catalogue.json` na pasta externa do app, só em build de debug. */
+    private fun arquivoDeTeste(): File? =
+        if (!BuildConfig.DEBUG) null else contexto.getExternalFilesDir(null)?.resolve("ports-catalogue.json")?.takeIf { it.exists() }
 
     private fun recorrerAoCache(cache: String?, erro: Exception): Resultado {
         if (cache == null) throw erro
@@ -83,7 +90,8 @@ class CatalogoOnline(private val contexto: Context) {
             logo = Titulo.logo(titulo),
             nomePort = repo.substringAfter('/'),
             tipo = "",
-            plataforma = Plataformas.nome(o.getString("platform")),
+            // sem plataforma, `other` ou `unknown` viram Outros (Plataformas.nome)
+            plataforma = Plataformas.nome(o.optString("platform")),
             repo = repo,
             descricao = textoIdioma(o.optJSONObject("description")) ?: "",
             arquivoQueServe = notas ?: "",
@@ -96,6 +104,7 @@ class CatalogoOnline(private val contexto: Context) {
             padraoApk = android.optTexto("pattern"),
             canal = o.optTexto("channel") ?: "latest",
             estrelas = o.optJSONObject("stats")?.takeIf { !it.isNull("stars") }?.optInt("stars"),
+            aiFlag = o.optBoolean("aiFlag", false),
         )
     }
 

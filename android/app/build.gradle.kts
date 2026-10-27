@@ -26,7 +26,10 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true // BuildConfig.DEBUG: catálogo de teste em debug (CatalogoOnline)
+    }
 }
 
 dependencies {

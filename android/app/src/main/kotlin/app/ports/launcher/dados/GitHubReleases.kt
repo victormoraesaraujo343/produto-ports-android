@@ -2,6 +2,7 @@ package app.ports.launcher.dados
 
 import android.content.Context
 import app.ports.core.Apks
+import app.ports.core.Lancamentos
 import app.ports.core.Validade
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,9 +13,10 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Última release de um port no GitHub, com o APK do padrão do catálogo.
- * Cache de 6 h em memória e em `filesDir/releases.json`. Sem rede ou com o
- * limite do GitHub estourado, devolve o que já tinha (ou nulo).
+ * APK de um port no GitHub: a release mais recente (das últimas 10) que tem um
+ * arquivo com o padrão do catálogo. Cache de 6 h em memória e em
+ * `filesDir/releases.json`. Sem rede ou com o limite do GitHub estourado,
+ * devolve o que já tinha (ou nulo).
  */
 class GitHubReleases(contexto: Context) {
     private class Entrada(val buscadoEm: Long, val release: Release?)
@@ -43,19 +45,22 @@ class GitHubReleases(contexto: Context) {
     }
 
     private fun buscar(repo: String, canal: String, padrao: String?): Release? {
-        val prerelease = canal == "prerelease"
-        val url = if (prerelease) "$API/repos/$repo/releases?per_page=10" else "$API/repos/$repo/releases/latest"
-        val resposta = Rede.texto(url, mapOf("Accept" to "application/vnd.github+json"))
+        val resposta = Rede.texto("$API/repos/$repo/releases?per_page=10", mapOf("Accept" to "application/vnd.github+json"))
         when (resposta.codigo) {
             404 -> return null
             403, 429 -> throw IOException("limite do GitHub")
         }
         if (resposta.codigo !in 200..299) throw IOException("GitHub respondeu ${resposta.codigo}")
-        val lancamento = if (prerelease) {
-            JSONArray(resposta.corpo).paraObjetos().firstOrNull { !it.optBoolean("draft") } ?: return null
-        } else {
-            JSONObject(resposta.corpo)
+        // a API manda da mais nova pra mais velha; a escolha (estável, rascunho) fica no core
+        val candidatas = JSONArray(resposta.corpo).paraObjetos().map { r ->
+            Lancamentos.Candidata(
+                item = r,
+                rascunho = r.optBoolean("draft"),
+                preliminar = r.optBoolean("prerelease"),
+                nomes = r.optJSONArray("assets")?.paraObjetos().orEmpty().map { it.optString("name") },
+            )
         }
+        val lancamento = Lancamentos.escolher(canal, padrao, candidatas) ?: return null
         val assets = lancamento.optJSONArray("assets")?.paraObjetos().orEmpty()
         val apk = Apks.primeiro(padrao, assets) { it.optString("name") } ?: return null
         return Release(

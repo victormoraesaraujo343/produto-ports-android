@@ -35,4 +35,17 @@ class TitulosTest {
         assertEquals("PC", Plataformas.nome("pc"))
         assertEquals("zzz", Plataformas.nome("zzz"))
     }
+
+    @Test fun `other, unknown e vazio viram Outros`() {
+        assertEquals("Outros", Plataformas.nome("other"))
+        assertEquals("Outros", Plataformas.nome("unknown"))
+        assertEquals("Outros", Plataformas.nome(""))
+        assertEquals("Outros", Plataformas.nome("  "))
+    }
+
+    @Test fun `o nome ja traduzido passa de novo sem mudar`() {
+        assertEquals("PC", Plataformas.nome("PC"))
+        assertEquals("Outros", Plataformas.nome("Outros"))
+        assertEquals("Nintendo 64", Plataformas.nome("Nintendo 64"))
+    }
 }

@@ -19,6 +19,28 @@ object Apks {
     }
 }
 
+/** Qual release do GitHub entrega o APK. */
+object Lancamentos {
+    /** Uma release já lida da API: `item` é o que o app guarda; `nomes` são os arquivos dela. */
+    class Candidata<T>(val item: T, val rascunho: Boolean, val preliminar: Boolean, val nomes: List<String>)
+
+    /**
+     * A mais recente que tem um arquivo com o padrão (a API manda da mais nova
+     * pra mais velha). Rascunho nunca entra. Canal `latest`: estável primeiro, e
+     * prerelease só se nenhuma estável bater. Canal `prerelease`: a mais recente
+     * que bater, estável ou não.
+     */
+    fun <T> escolher(canal: String, padrao: String?, candidatas: List<Candidata<T>>): T? {
+        val validas = candidatas.filter { !it.rascunho && Apks.primeiro(padrao, it.nomes) { nome -> nome } != null }
+        val escolhida = if (canal == "prerelease") {
+            validas.firstOrNull()
+        } else {
+            validas.firstOrNull { !it.preliminar } ?: validas.firstOrNull()
+        }
+        return escolhida?.item
+    }
+}
+
 object Versoes {
     /** Tira o "v" da tag do GitHub: `v1.3.2` vira `1.3.2`. */
     fun semV(tag: String): String = tag.trim().removePrefix("v")

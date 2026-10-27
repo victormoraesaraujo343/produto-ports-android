@@ -43,6 +43,7 @@ class Repositorio(contexto: Context) {
     private val instalador = Instalador(app)
     private val capasSgdb = Capas(app)
     private val uso = app.getSharedPreferences("uso", Context.MODE_PRIVATE)
+    private val ajustes = app.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
 
     /** Carregador de imagens das capas (a UI usa `imagens.carregar(url, largura)`). */
     val imagens = Imagens(app)
@@ -76,6 +77,7 @@ class Repositorio(contexto: Context) {
 
     companion object {
         @Volatile private var instancia: Repositorio? = null
+        private const val CHAVE_MOSTRAR_IA = "mostrarIA"
 
         fun obter(contexto: Context): Repositorio =
             instancia ?: synchronized(this) { instancia ?: Repositorio(contexto).also { instancia = it } }
@@ -86,6 +88,13 @@ class Repositorio(contexto: Context) {
         get() = capasSgdb.chave
         set(valor) {
             capasSgdb.chave = valor
+        }
+
+    /** Mostrar os ports feitos com IA nas listas (Ajustes). Padrão: sim. */
+    var mostrarPortsIA: Boolean
+        get() = ajustes.getBoolean(CHAVE_MOSTRAR_IA, true)
+        set(valor) {
+            ajustes.edit().putBoolean(CHAVE_MOSTRAR_IA, valor).apply()
         }
 
     /** Busca o catálogo. Com `forcar` falso, o cache de até 6 h é usado. */

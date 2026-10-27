@@ -33,6 +33,8 @@ data class Port(
     /** Canal das releases: `latest` ou `prerelease`. */
     val canal: String = "latest",
     val estrelas: Int? = null,
+    /** Feito com IA (`aiFlag` do catálogo, marcado pelo awesome-decomp-games). Ausente é falso. */
+    val aiFlag: Boolean = false,
 )
 
 /** O que se lista na tela: o port e o estado já calculado. */

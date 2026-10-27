@@ -28,4 +28,58 @@ class LancamentoTest {
         assertEquals("1.5 GB", Tamanhos.formatar(1536L * 1_048_576))
         assertEquals("", Tamanhos.formatar(0L))
     }
+
+    private val padraoApk = "\\.apk$"
+    private fun candidata(tag: String, preliminar: Boolean = false, rascunho: Boolean = false, nomes: List<String> = emptyList()) =
+        Lancamentos.Candidata(tag, rascunho, preliminar, nomes)
+
+    @Test fun `release mais nova so com windows cede pra anterior com apk`() {
+        val candidatas = listOf(
+            candidata("v2.0", nomes = listOf("Forza-windows.zip")),
+            candidata("v1.9", nomes = listOf("Forza-android.apk")),
+        )
+        assertEquals("v1.9", Lancamentos.escolher("latest", padraoApk, candidatas))
+    }
+
+    @Test fun `release mais nova vazia cede pra anterior com apk`() {
+        val candidatas = listOf(candidata("v2.0"), candidata("v1.9", nomes = listOf("Forza-android.apk")))
+        assertEquals("v1.9", Lancamentos.escolher("latest", padraoApk, candidatas))
+    }
+
+    @Test fun `canal latest prefere estavel a prerelease mais nova`() {
+        val candidatas = listOf(
+            candidata("v3.0-rc1", preliminar = true, nomes = listOf("Forza-android.apk")),
+            candidata("v2.0", nomes = listOf("Forza-android.apk")),
+        )
+        assertEquals("v2.0", Lancamentos.escolher("latest", padraoApk, candidatas))
+    }
+
+    @Test fun `canal latest usa prerelease so quando nenhuma estavel bate`() {
+        val candidatas = listOf(
+            candidata("v3.0-rc1", preliminar = true, nomes = listOf("Forza-android.apk")),
+            candidata("v2.0", nomes = listOf("Forza-windows.zip")),
+        )
+        assertEquals("v3.0-rc1", Lancamentos.escolher("latest", padraoApk, candidatas))
+    }
+
+    @Test fun `canal prerelease pega a mais nova que bate, estavel ou nao`() {
+        val candidatas = listOf(
+            candidata("v3.0-rc1", preliminar = true, nomes = listOf("Forza-android.apk")),
+            candidata("v2.0", nomes = listOf("Forza-android.apk")),
+        )
+        assertEquals("v3.0-rc1", Lancamentos.escolher("prerelease", padraoApk, candidatas))
+    }
+
+    @Test fun `rascunho nunca entra`() {
+        val candidatas = listOf(
+            candidata("v3.0", rascunho = true, nomes = listOf("Forza-android.apk")),
+            candidata("v2.0", nomes = listOf("Forza-android.apk")),
+        )
+        assertEquals("v2.0", Lancamentos.escolher("latest", padraoApk, candidatas))
+    }
+
+    @Test fun `sem nenhum apk que bata devolve nulo`() {
+        val candidatas = listOf(candidata("v2.0", nomes = listOf("Forza-windows.zip")), candidata("v1.0"))
+        assertNull(Lancamentos.escolher("latest", padraoApk, candidatas))
+    }
 }

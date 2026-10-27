@@ -14,15 +14,22 @@ class ConsolesTest {
         assertEquals("Nintendo 64", Consoles.nomeDe(" Nintendo 64 "))
     }
 
-    @Test fun `agrupa por contagem desc e depois por nome`() {
+    @Test fun `agrupa por contagem desc e depois por nome, com Outros por ultimo`() {
         val ports = listOf(
             porta("a", "PlayStation"), porta("b", "Nintendo 64"), porta("c", "Dreamcast"),
             porta("d", "Nintendo 64"), porta("e", ""), porta("f", "Dreamcast"), porta("g", "Nintendo 64"),
+            porta("h", "other"), porta("i", "other"), porta("j", "other"), porta("k", "other"),
         )
         assertEquals(
-            listOf("Nintendo 64" to 3, "Dreamcast" to 2, "Outros" to 1, "PlayStation" to 1),
+            listOf("Nintendo 64" to 3, "Dreamcast" to 2, "PlayStation" to 1, "Outros" to 5),
             Consoles.agrupar(ports),
         )
+    }
+
+    @Test fun `PC aparece como console normal`() {
+        val ports = listOf(porta("a", "PC"), porta("b", "PC"), porta("c", "Dreamcast"))
+        assertEquals(listOf("PC" to 2, "Dreamcast" to 1), Consoles.agrupar(ports))
+        assertEquals(listOf("a", "b"), Consoles.filtrar(ports, "PC").map { it.port.id })
     }
 
     @Test fun `filtra por console e nulo mostra tudo`() {

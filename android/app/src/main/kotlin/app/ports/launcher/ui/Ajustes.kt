@@ -41,12 +41,15 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
- * AJUSTES — deitado. Duas linhas: a chave das capas (SteamGridDB) e a lista de
- * ports. Sem texto além do nome e do valor (D-007). A chave nunca aparece na tela.
+ * AJUSTES — deitado. Três linhas: a chave das capas (SteamGridDB), os ports
+ * feitos com IA (mostrar ou esconder nas listas) e a lista de ports. Sem texto
+ * além do nome e do valor (D-007). A chave nunca aparece na tela.
  */
 @Composable
 fun Ajustes(
     atualizadoEm: String?,
+    mostrarIA: Boolean,
+    aoMostrarIA: (Boolean) -> Unit,
     aoSecao: (Secao) -> Unit,
     aoChaveMudou: () -> Unit,
     aoAtualizarLista: () -> Unit,
@@ -120,6 +123,12 @@ fun Ajustes(
                     if (comChave) BotaoFocavel("Remover", primario = false, botao = null, aoAcionar = { gravar("") })
                 }
             }
+            Linha(
+                titulo = "Ports feitos com IA",
+                valor = if (mostrarIA) "Mostrar" else "Esconder",
+                entrada = entrada,
+                aoAcionar = { aoMostrarIA(!mostrarIA) },
+            )
             Linha(
                 titulo = "Lista de ports",
                 valor = atualizadoEm?.let { "Atualizada ${quando(it)}" } ?: "—",

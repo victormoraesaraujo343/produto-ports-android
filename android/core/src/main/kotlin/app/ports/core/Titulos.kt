@@ -64,6 +64,8 @@ object Titulo {
 
 /** Nomes de plataforma pra mostrar na tela. Id desconhecido volta como veio. */
 object Plataformas {
+    const val OUTROS = "Outros"
+
     private val nomes = mapOf(
         "n64" to "Nintendo 64",
         "snes" to "Super Nintendo",
@@ -92,5 +94,10 @@ object Plataformas {
         "pc" to "PC",
     )
 
-    fun nome(id: String): String = nomes[id.lowercase(Locale.ROOT)] ?: id
+    /** `other`, vazio e `unknown` (e o que não tem plataforma) viram Outros. */
+    fun nome(id: String): String {
+        val limpo = id.trim()
+        if (limpo.isEmpty() || limpo.equals("other", true) || limpo.equals("unknown", true)) return OUTROS
+        return nomes[limpo.lowercase(Locale.ROOT)] ?: limpo
+    }
 }

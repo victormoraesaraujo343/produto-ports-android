@@ -83,6 +83,8 @@ class MainActivity : ComponentActivity() {
                 LocalPedirCapa provides pedirCapaAoAparecer,
             ) {
                 val estado by repositorio.estado.collectAsState()
+                // ports feitos com IA: some de Início e Ports quando escondidos (Ajustes)
+                var mostrarIA by remember { mutableStateOf(repositorio.mostrarPortsIA) }
                 val pilha = remember { mutableStateListOf<Tela>(Tela.DeSecao(Secao.INICIO)) }
                 var focadoId by remember { mutableStateOf<String?>(null) }
                 // o console escolhido fica enquanto o app está aberto (passa por todas as seções)
@@ -93,9 +95,10 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) { repositorio.avisos.collect { aviso(it) } }
 
                 val pronto = estado as? EstadoCatalogo.Pronto
-                // um único filtro: ports de VR saem de todas as listas
-                val visiveis = remember(pronto) { pronto?.ports.orEmpty().filter { !Vr.ehVr(it.port.titulo) } }
-                val recentes = remember(visiveis, voltas) { repositorio.recentes().filter { !Vr.ehVr(it.port.titulo) } }
+                // um único filtro: ports de VR saem de todas as listas, e os feitos com IA quando escondidos
+                fun naLista(pt: PortNaTela) = !Vr.ehVr(pt.port.titulo) && (mostrarIA || !pt.port.aiFlag)
+                val visiveis = remember(pronto, mostrarIA) { pronto?.ports.orEmpty().filter(::naLista) }
+                val recentes = remember(visiveis, voltas) { repositorio.recentes().filter(::naLista) }
                 // sem recentes, a fileira mostra os mais estrelados
                 val fileira = if (recentes.isNotEmpty()) recentes else visiveis.sortedByDescending { it.port.estrelas ?: -1 }.take(8)
 
@@ -130,6 +133,8 @@ class MainActivity : ComponentActivity() {
                             Secao.AJUSTES -> Ajustes(
                                 atualizadoEm = pronto?.atualizadoEm,
                                 aoSecao = { irSecao(it) },
+                                mostrarIA = mostrarIA,
+                                aoMostrarIA = { mostrarIA = it; repositorio.mostrarPortsIA = it },
                                 aoChaveMudou = { capasPedidas.clear() },
                                 aoAtualizarLista = { atualizarLista() },
                             )
