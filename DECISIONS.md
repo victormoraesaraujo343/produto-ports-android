@@ -72,6 +72,20 @@
 
 **Por quê:** o Victor quer ver do que se trata (descrição, versão, tamanho, projeto) antes de baixar.
 
+## D-009 — Detalhes com galeria de gameplay e fundo animado
+
+**Status:** aceita (escolha do Victor no mockup `laboratorio/_mockups/03-galeria.html`: A + 1 + I2) · **Data:** 2026-10-27
+
+**Decisão:**
+- **Fundo (A):** as imagens da galeria vão passando (troca a cada ~6 s, com fade e zoom lento), atrás de um véu escuro.
+- **Galeria (1):** um visor grande na coluna da direita, com miniaturas embaixo **sem legenda**. ←/→ trocam a imagem e A abre em tela cheia.
+- **Infos (I2):** "Sobre" e "Ficha" ficam embaixo da galeria, na mesma coluna, que rola com ↓.
+- **Só gameplay, nesta ordem:** imagens do próprio port no repositório (README e pastas de imagens), depois as capturas do jogo original no libretro-thumbnails (todas as versões, sem repetidas) e por último a tela de título. A caixa não entra na galeria; ela já é a capa.
+
+**Por quê:** o fundo dos Detalhes ficava vazio ou com uma imagem aleatória. O Victor pediu uma galeria, e com mais gameplay que capas.
+
+**O que não deu:** clipe em vídeo. Não há fonte aberta de vídeo, e nenhum README verificado tinha vídeo ou GIF. Se um GIF aparecer, ele entra como imagem.
+
 ## Decisões da IA que o Victor precisa conferir
 
 - **Q-a:** "Ports" substitui Catálogo e Biblioteca, com filtros Instalados, Disponíveis e Atualizações.

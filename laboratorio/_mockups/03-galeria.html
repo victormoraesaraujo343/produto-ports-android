@@ -239,7 +239,7 @@ function desenhar() {
   tela.querySelector("[data-ficha-linha]").innerHTML = jogo.ficha.map(([, v]) => `<b>${v}</b>`).join(" · ");
   mostrarAba(abaAtual);
   tela.querySelector("[data-miniaturas]").innerHTML = jogo.imagens.map((im, i) =>
-    `<div class="mini${im.contem ? " contem" : ""}${i === foco ? " focado" : ""}" data-i="${i}" style="background-image:url('${im.url}')"><span class="fonte">${im.fonte}</span></div>`).join("");
+    `<div class="mini${im.contem ? " contem" : ""}${i === foco ? " focado" : ""}" data-i="${i}" style="background-image:url('${im.url}')"></div>`).join("");
   tela.querySelectorAll(".mini").forEach((m) => {
     m.onclick = () => { foco = +m.dataset.i; desenhar(); trocarFundo(jogo.imagens[foco].url); };
     m.ondblclick = () => abrirCheia();
