@@ -3,6 +3,7 @@ package app.ports.core
 /** Regras de validade dos caches locais (catálogo, releases, capas). */
 object Validade {
     const val SEIS_HORAS = 6L * 60 * 60 * 1000
+    const val VINTE_QUATRO_HORAS = 24L * 60 * 60 * 1000
     const val SETE_DIAS = 7L * 24 * 60 * 60 * 1000
 
     /**

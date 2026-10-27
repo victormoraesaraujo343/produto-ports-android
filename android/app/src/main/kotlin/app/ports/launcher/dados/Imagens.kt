@@ -7,10 +7,13 @@ import android.util.LruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Carregador de imagens das capas, sem dependência nova: baixa pra
@@ -22,19 +25,28 @@ class Imagens(contexto: Context) {
         override fun sizeOf(chave: String, valor: Bitmap): Int = valor.byteCount / 1024
     }
 
+    // uma trava por URL: a mesma imagem pedida em paralelo (fundo, visor e miniatura) não baixa duas vezes no mesmo .parcial
+    private val travas = ConcurrentHashMap<String, Mutex>()
+
     /** Imagem com largura de no máximo `larguraMax` pixels, ou nulo se não deu. */
     suspend fun carregar(url: String, larguraMax: Int): ImageBitmap? = withContext(Dispatchers.IO) {
         val chave = "$url@$larguraMax"
         memoria.get(chave)?.let { return@withContext it.asImageBitmap() }
+        travas.getOrPut(url) { Mutex() }.withLock { abrir(url, larguraMax, chave) }?.asImageBitmap()
+    }
+
+    /** Baixa se preciso e decodifica. Chamado com a trava da URL. */
+    private fun abrir(url: String, larguraMax: Int, chave: String): Bitmap? {
+        memoria.get(chave)?.let { return it }
         val arquivo = arquivoDe(url)
-        if (!arquivo.exists() && !baixar(url, arquivo)) return@withContext null
+        if (!arquivo.exists() && !baixar(url, arquivo)) return null
         val bitmap = decodificar(arquivo, larguraMax) ?: run {
             // arquivo que não é imagem: apaga pra tentar de novo depois
             arquivo.delete()
-            return@withContext null
+            return null
         }
         memoria.put(chave, bitmap)
-        bitmap.asImageBitmap()
+        return bitmap
     }
 
     private fun baixar(url: String, destino: File): Boolean = try {

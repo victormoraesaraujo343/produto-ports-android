@@ -78,8 +78,8 @@
 
 **Decisão:**
 - **Fundo (A):** as imagens da galeria vão passando (troca a cada ~6 s, com fade e zoom lento), atrás de um véu escuro.
-- **Galeria (1):** um visor grande na coluna da direita, com miniaturas embaixo **sem legenda**. ←/→ trocam a imagem e A abre em tela cheia.
-- **Infos (I2):** "Sobre" e "Ficha" ficam embaixo da galeria, na mesma coluna, que rola com ↓.
+- **Galeria em cima do nome** (mudança do Victor, que substitui o "1 + I2"): o visor 16:9 e as miniaturas **sem legenda** ficam no topo da coluna da esquerda, com o nome, o estado e os botões embaixo. ←/→ trocam a imagem e A abre em tela cheia.
+- **Coluna da direita:** "O que o port precisa", "Sobre" e "Ficha", rolando.
 - **Só gameplay, nesta ordem:** imagens do próprio port no repositório (README e pastas de imagens), depois as capturas do jogo original no libretro-thumbnails (todas as versões, sem repetidas) e por último a tela de título. A caixa não entra na galeria; ela já é a capa.
 
 **Por quê:** o fundo dos Detalhes ficava vazio ou com uma imagem aleatória. O Victor pediu uma galeria, e com mais gameplay que capas.

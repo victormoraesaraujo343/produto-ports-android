@@ -47,6 +47,8 @@ class Repositorio(contexto: Context) {
     /** Carregador de imagens das capas (a UI usa `imagens.carregar(url, largura)`). */
     val imagens = Imagens(app)
 
+    private val midia = Midia(app)
+
     private val _estado = MutableStateFlow<EstadoCatalogo>(EstadoCatalogo.Carregando)
     val estado: StateFlow<EstadoCatalogo> = _estado.asStateFlow()
 
@@ -168,6 +170,12 @@ class Repositorio(contexto: Context) {
         }
         republicar()
         (capaAtual ?: capa) to (heroiAtual ?: heroi)
+    }
+
+    /** Galeria de gameplay do port (URLs, até 10, gameplay primeiro). Vazia se não acha nada. */
+    suspend fun galeria(id: String): List<String> {
+        val p = synchronized(lock) { base.find { it.id == id } } ?: return emptyList()
+        return midia.galeria(p)
     }
 
     /* ------------------------------------------------------------ interno */

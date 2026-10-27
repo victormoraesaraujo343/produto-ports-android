@@ -83,6 +83,22 @@
   [data-galeria="faixa"] .sobre-faixa { position:absolute; z-index:2; right:40px; top:40px; width:400px; padding:12px 14px; border-radius:var(--raio);
                                          background:rgba(13,13,13,.72); border:1px solid var(--borda); line-height:1.5 }
 
+  /* ---------- 3 · galeria em cima do nome; à direita: o que precisa, sobre e ficha ---------- */
+  .galeria-topo, .direita-topo { display:none }
+  [data-galeria="topo"] .galeria-topo { display:block; margin-bottom:12px }
+  [data-galeria="topo"] .visor-topo { width:400px; height:225px; border-radius:var(--raio); background:#0b0b0b center/contain no-repeat;
+                                      border:1px solid var(--borda); box-shadow:0 0 18px #000; image-rendering:pixelated }
+  [data-galeria="topo"] .galeria-topo .miniaturas { margin-top:10px; gap:10px }
+  [data-galeria="topo"] .galeria-topo .mini { width:56px; height:38px }
+  [data-galeria="topo"] .acao { top:28px }
+  [data-galeria="topo"] .titulo { font-size:28px }
+  [data-galeria="topo"] .meta { margin-top:4px; font-size:13px }
+  [data-galeria="topo"] .estado { margin-top:8px }
+  [data-galeria="topo"] .botoes { margin-top:10px }
+  [data-galeria="topo"] .acao .precisa, [data-galeria="topo"] .acao .info-esq, [data-galeria="topo"] > .galeria, [data-galeria="topo"] .sobre-faixa { display:none }
+  [data-galeria="topo"] .direita-topo { display:flex; flex-direction:column; gap:10px; position:absolute; z-index:2; right:40px; top:28px; bottom:40px; width:420px; overflow:auto; scrollbar-width:none }
+  [data-galeria="topo"] .direita-topo .precisa { margin:0 }
+
   /* ---------- onde ficam as infos (variações do 1) ---------- */
   .info-esq, .info-baixo, .abas, .desce, [data-painel="sobre"], [data-painel="ficha"] { display:none }
   .bloco { padding:12px 14px; border-radius:var(--raio); background:rgba(13,13,13,.78); border:1px solid var(--borda); line-height:1.5 }
@@ -137,15 +153,16 @@
   <div class="opcoes">
     <div class="grupo" data-op="jogo"><span>Jogo</span><button data-v="banjo" aria-pressed="true">Banjo-Kazooie</button><button data-v="pokemon">Pokémon Silver</button></div>
     <div class="grupo" data-op="fundo"><span>Fundo</span><button data-v="slideshow" aria-pressed="true">A · Imagens passando, com zoom lento</button><button data-v="espelho">B · Espelho da imagem em foco</button></div>
-    <div class="grupo" data-op="galeria"><span>Galeria</span><button data-v="visor" aria-pressed="true">1 · Visor grande + miniaturas</button><button data-v="faixa">2 · Faixa larga embaixo</button></div>
-    <div class="grupo" data-op="infos"><span>Infos (no 1)</span><button data-v="esquerda" aria-pressed="true">I1 · Esquerda, compacto</button><button data-v="baixo">I2 · Embaixo da galeria (rola)</button><button data-v="abas">I3 · Abas no visor</button></div>
+    <div class="grupo" data-op="galeria"><span>Galeria</span><button data-v="topo" aria-pressed="true">3 · Em cima do nome</button><button data-v="visor">1 · Visor grande + miniaturas</button><button data-v="faixa">2 · Faixa larga embaixo</button></div>
+    <div class="grupo" data-op="infos"><span>Infos (no 1)</span><button data-v="esquerda">I1 · Esquerda, compacto</button><button data-v="baixo" aria-pressed="true">I2 · Embaixo da galeria (rola)</button><button data-v="abas">I3 · Abas no visor</button></div>
   </div>
 
-  <div class="tela" id="tela" data-fundo="slideshow" data-galeria="visor" data-infos="esquerda">
+  <div class="tela" id="tela" data-fundo="slideshow" data-galeria="topo" data-infos="baixo">
     <div class="fundo"><div class="camada" data-c="0"></div><div class="camada" data-c="1"></div></div>
     <div class="veu"></div>
 
     <section class="acao">
+      <div class="galeria-topo"><div class="visor-topo" data-visor-topo></div><div class="miniaturas" data-miniaturas-topo></div></div>
       <h2 class="titulo" data-titulo></h2>
       <div class="meta" data-meta></div>
       <div class="estado"><i>+</i>Ainda não instalado</div>
@@ -165,6 +182,12 @@
     </section>
 
     <div class="sobre-faixa" data-sobre></div>
+
+    <aside class="direita-topo">
+      <div class="bloco precisa"><div class="rotulo">O que o port precisa</div><div class="item"><i class="n">+</i>Port não instalado</div><div class="item"><i>✓</i>Roda neste aparelho</div></div>
+      <div class="bloco"><div class="rotulo">Sobre</div><p data-sobre-txt></p></div>
+      <div class="bloco"><div class="rotulo">Ficha</div><dl data-ficha-dl></dl></div>
+    </aside>
 
     <section class="galeria" data-rolagem>
       <nav class="abas" aria-label="Abas"><span class="aba atual" data-aba="galeria">Galeria</span><span class="aba" data-aba="sobre">Sobre</span><span class="aba" data-aba="ficha">Ficha</span><span class="aba-dica"><span class="g">L2</span><span class="g">R2</span></span></nav>
@@ -245,6 +268,12 @@ function desenhar() {
     m.ondblclick = () => abrirCheia();
   });
   tela.querySelector("[data-visor]").style.backgroundImage = `url('${jogo.imagens[foco].url}')`;
+  tela.querySelector("[data-visor-topo]").style.backgroundImage = `url('${jogo.imagens[foco].url}')`;
+  tela.querySelector("[data-miniaturas-topo]").innerHTML = tela.querySelector("[data-miniaturas]").innerHTML;
+  tela.querySelectorAll("[data-miniaturas-topo] .mini").forEach((m) => {
+    m.onclick = () => { foco = +m.dataset.i; desenhar(); if (tela.dataset.fundo === "espelho") trocarFundo(jogo.imagens[foco].url); };
+    m.ondblclick = () => abrirCheia();
+  });
 }
 
 function trocarFundo(url) {

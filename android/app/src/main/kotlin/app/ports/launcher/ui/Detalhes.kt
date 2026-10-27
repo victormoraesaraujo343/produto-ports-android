@@ -5,6 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,8 +29,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +49,8 @@ import app.ports.core.PortNaTela
 import app.ports.core.Textos
 import app.ports.core.Titulo
 import app.ports.core.Tom
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * DETALHES — deitado. O estado que a capa resume vira a lista do que o port
@@ -55,29 +64,66 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
     val acao = if (pt.estado == Estado.NAO_RODA) "Instalar mesmo assim" else Textos.de(pt.estado).acao
     val entrada = LocalEntrada.current.atual
     val contexto = LocalContext.current
+    val escopo = rememberCoroutineScope()
     // a release (versão, tamanho) e as capas chegam aqui, depois que a tela abre
     LaunchedEffect(p.id) {
         repositorio.detalhar(p.id)
         repositorio.capas(p.id)
     }
+    // a galeria também: até chegar (null), a tela não mostra nada dela
+    var galeria by remember(p.id) { mutableStateOf<List<String>?>(null) }
+    LaunchedEffect(p.id) { galeria = repositorio.galeria(p.id) }
+    val imagens = galeria.orEmpty()
+    var foco by remember(p.id) { mutableIntStateOf(0) }      // miniatura e visor
+    var fundo by remember(p.id) { mutableIntStateOf(0) }     // imagem do fundo agora
+    var saltos by remember(p.id) { mutableIntStateOf(0) }    // cada salto manual reinicia a contagem de 6 s
+    var visorAberto by remember(p.id) { mutableStateOf(false) }
+    val atual = if (imagens.isEmpty()) 0 else foco.coerceIn(0, imagens.lastIndex)
+    val focos = remember(imagens.size) { List(imagens.size) { FocusRequester() } }
+    val reduzido = remember { semAnimacao(contexto) }
 
+    // o fundo passa sozinho a cada 6 s; um salto manual (miniatura) recomeça a contagem
+    LaunchedEffect(imagens.size, saltos) {
+        if (imagens.size > 1) {
+            while (true) {
+                delay(6000)
+                fundo = (fundo + 1) % imagens.size
+            }
+        }
+    }
+    fun irPara(i: Int) {
+        foco = i
+        fundo = i
+        saltos++
+    }
+    fun fecharVisor() {
+        visorAberto = false
+        // a miniatura volta a ter o foco, como antes de abrir
+        escopo.launch { focos.getOrNull(atual)?.focarQuandoPuder() }
+    }
+
+    val principal = remember { FocusRequester() }
     Fundo {
+        // sem galeria: hero, capa borrada ou placeholder, como antes. Com galeria, o slideshow cobre tudo.
         Arte(p, Modifier.fillMaxSize().padding(start = 270.dp), comNome = false, url = p.heroUrl ?: p.capaUrl, larguraMax = 960, desfocar = p.heroUrl == null)
+        AnimatedVisibility(visible = imagens.isNotEmpty(), modifier = Modifier.fillMaxSize(), enter = fadeIn(tween(900)), exit = fadeOut(tween(0))) {
+            Slideshow(imagens, fundo, reduzido)
+        }
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.34f to Cor.fundo, 0.52f to Color(0xD1121212), 0.75f to Color(0x73121212), 1f to Color(0xB3121212))))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.6f to Color.Transparent, 1f to Color(0xEB121212))))
 
         // ‹ só no toque; com controle, B volta (dica embaixo)
         if (entrada == Entrada.TOQUE) Box(Modifier.padding(start = 20.dp, top = 8.dp).clickableSemFoco(aoVoltar)) {
             Texto("‹", Tipo.logo.copy(fontSize = 28.sp))
         }
 
-        Row(Modifier.fillMaxSize().padding(top = 50.dp)) {
+        Row(Modifier.fillMaxSize().padding(top = 50.dp, end = 34.dp)) {
             // coluna da ação
             Column(Modifier.padding(start = 32.dp).width(400.dp)) {
                 Texto(Titulo.semParenteses(p.titulo), Tipo.logo.copy(fontSize = 28.sp))
                 val plataforma = plataformaMostrada(p.plataforma)
                 Texto(listOfNotNull(p.nomePort, plataforma).joinToString(" · "), Tipo.corpo.copy(fontSize = 13.sp, color = Color(0xFFE6E7EC)), Modifier.padding(top = 4.dp))
                 Box(Modifier.padding(top = 8.dp)) { LinhaEstado(pt) }
-                val principal = remember { FocusRequester() }
                 Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     BotaoFocavel(acao, primario = pt.estado != Estado.NAO_RODA, botao = Botao.A, focoRef = principal, aoAcionar = { aoAcao(pt) })
                     if (pt.estado == Estado.ATUALIZAR) BotaoFocavel("Atualizar", primario = false, botao = null, aoAcionar = { aoAtualizar(pt) })
@@ -88,8 +134,23 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
                 Texto("O QUE O PORT PRECISA", Tipo.rotulo, Modifier.padding(top = 14.dp, bottom = 4.dp))
                 Precisa(pt)
             }
-            // coluna de informação: blocos focáveis pra rolar com o direcional
-            Column(Modifier.weight(1f).fillMaxHeight().padding(start = 40.dp, end = 30.dp, bottom = 40.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Box(Modifier.weight(1f))
+            // coluna da direita: galeria (visor e miniaturas) e, embaixo, Sobre e Ficha. Rola com ↓.
+            // 6 dp de folga pros contornos de foco não serem cortados pela rolagem
+            Column(
+                Modifier.width(452.dp).fillMaxHeight().padding(horizontal = 6.dp).verticalScroll(rememberScrollState()).padding(bottom = 40.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                if (imagens.isNotEmpty()) {
+                    Visor(imagens[atual]) { visorAberto = true }
+                    // com muitas imagens a faixa rola na horizontal; a folga de 6 dp deixa o contorno de foco aparecer
+                    Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 6.dp), horizontalArrangement = Arrangement.spacedBy(11.dp)) {
+                        imagens.forEachIndexed { i, url ->
+                            Miniatura(url, focos[i], aoFocar = { irPara(i) }, aoAbrir = { irPara(i); visorAberto = true })
+                        }
+                    }
+                    Texto("↓ Sobre e ficha", Tipo.dica.copy(fontSize = 12.5.sp))
+                }
                 if (p.descricao.isNotBlank()) Bloco("SOBRE", entrada) { Texto(p.descricao, Tipo.corpo.copy(fontSize = 13.5.sp, lineHeight = 20.sp)) }
                 Bloco("FICHA", entrada) {
                     if (p.tipo.isNotBlank()) Ficha("Tipo", p.tipo.replaceFirstChar { it.uppercase() })
@@ -100,6 +161,9 @@ fun Detalhes(pt: PortNaTela, aoAcao: (PortNaTela) -> Unit, aoAtualizar: (PortNaT
             }
         }
         Dicas(listOf(Botao.B to "Voltar"),Modifier.align(Alignment.BottomEnd).padding(end = 30.dp, bottom = 10.dp))
+        if (visorAberto && imagens.isNotEmpty()) {
+            Visualizador(imagens, atual, aoMudar = { irPara(it) }, aoFechar = { fecharVisor() })
+        }
     }
 }
 
