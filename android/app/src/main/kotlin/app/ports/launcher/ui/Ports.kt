@@ -33,22 +33,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.ports.core.Consoles
 import app.ports.core.Estado
 import app.ports.core.Filtro
+import app.ports.core.JogoNaTela
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
 import app.ports.core.Titulo
@@ -61,7 +64,7 @@ import app.ports.core.Titulo
  */
 @Composable
 fun Ports(
-    todos: List<PortNaTela>,
+    jogos: List<JogoNaTela>,
     focoInicial: String?,
     aoFocar: (PortNaTela?) -> Unit,
     aoAcao: (PortNaTela) -> Unit,
@@ -70,15 +73,17 @@ fun Ports(
     aoConsole: (String?) -> Unit,
 ) {
     var filtro by rememberSaveable { mutableStateOf(Filtro.TODOS) }
-    // o foco guarda o id: a faixa de baixo mostra sempre o estado atual do port
+    // o foco guarda a chave do jogo: a faixa de baixo segue o jogo mesmo quando a fonte principal muda
     var focadoId by remember { mutableStateOf<String?>(null) }
-    val focado = todos.find { it.port.id == focadoId }
+    val focado = jogos.find { it.chave == focadoId }
+    // a volta dos Detalhes traz o id de uma fonte: o foco vai pro jogo que a tem
+    val chaveInicial = jogos.find { j -> j.fontes.any { it.port.id == focoInicial } }?.chave
     val entrada = LocalEntrada.current.atual
     val pedirCapa = LocalPedirCapa.current
     // o console guardado pode ter saído do catálogo: aí vale Todos
-    val consoleAtivo = console?.takeIf { escolhido -> todos.any { Consoles.nomeDe(it.port.plataforma) == escolhido } }
-    val porConsole = Consoles.filtrar(todos, consoleAtivo)
-    val lista = porConsole.filter(filtro.aceita)
+    val consoleAtivo = console?.takeIf { escolhido -> jogos.any { Consoles.nomeDe(it.principal.port.plataforma) == escolhido } }
+    val porConsole = jogos.filter { consoleAtivo == null || Consoles.nomeDe(it.principal.port.plataforma) == consoleAtivo }
+    val lista = porConsole.filter { filtro.aceita(it.principal) }
 
     var painelAberto by remember { mutableStateOf(false) }
     var voltarAoChip by remember { mutableStateOf(false) }
@@ -117,7 +122,7 @@ fun Ports(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Texto(f.nome, Tipo.secao.copy(fontSize = 13.sp, color = if (sel) Color(0xFF121212) else Cor.texto))
-                    Texto("${porConsole.count(f.aceita)}", Tipo.dica.copy(fontSize = 12.sp, color = if (sel) Color(0xFF4A4B52) else Cor.texto2))
+                    Texto("${porConsole.count { f.aceita(it.principal) }}", Tipo.dica.copy(fontSize = 12.sp, color = if (sel) Color(0xFF4A4B52) else Cor.texto2))
                 }
             }
             Box(Modifier.weight(1f))
@@ -147,26 +152,36 @@ fun Ports(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            items(lista, key = { it.port.id }) { pt ->
+            items(lista, key = { it.chave }) { jogo ->
+                val pt = jogo.principal
                 LaunchedEffect(pt.port.id) { pedirCapa(pt.port.id) }
                 var temFoco by remember { mutableStateOf(false) }
                 val sobe by animateDpAsState(if (temFoco) (-3).dp else 0.dp, tween(120), label = "sobe")
                 Box(
                     Modifier
-                        .then(if (pt.port.id == (focoInicial ?: lista.firstOrNull()?.port?.id)) Modifier.focusRequester(primeiro) else Modifier)
-                        .offset(y = sobe)
+                        .then(if (jogo.chave == (chaveInicial ?: lista.firstOrNull()?.chave)) Modifier.focusRequester(primeiro) else Modifier)
                         .onFocusChanged {
                             temFoco = it.isFocused
-                            if (it.isFocused) { focadoId = pt.port.id; aoFocar(pt) }
+                            if (it.isFocused) { focadoId = jogo.chave; aoFocar(pt) }
                         }
+                        .acionavel { aoAcao(pt) }
+                        // a capa sobe só no desenho: se subisse no layout, as vizinhas pareceriam "embaixo"
+                        // dela e o ↓ andaria pro lado em vez de trazer a próxima fileira
+                        .graphicsLayer { translationY = sobe.toPx() }
                         .contornoFoco(temFoco, entrada = entrada)
                         .aspectRatio(3f / 4f)
                         .shadow(8.dp, RoundedCornerShape(6.dp))
-                        .clip(RoundedCornerShape(6.dp))
-                        .acionavel { aoAcao(pt) },
+                        .clip(RoundedCornerShape(6.dp)),
                 ) {
                     Arte(pt.port, Modifier.fillMaxSize(), url = pt.port.capaUrl, larguraMax = 360)
                     Selo(pt, Modifier.align(Alignment.BottomEnd).padding(6.dp))
+                    // mais de uma fonte: pílula embaixo à esquerda, espelho do selo
+                    if (jogo.fontes.size > 1) Box(
+                        Modifier.align(Alignment.BottomStart).padding(6.dp).height(20.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xC7000000)).padding(horizontal = 7.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Texto("${jogo.fontes.size} fontes", Tipo.botao.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Cor.claro))
+                    }
                     if (pt.estado == Estado.BAIXANDO) Barra(pt.progresso ?: 0, Modifier.align(Alignment.BottomStart).fillMaxWidth())
                 }
             }
@@ -179,9 +194,11 @@ fun Ports(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            val pt = focado
+            val pt = focado?.principal
+            val fontes = focado?.fontes?.size ?: 0
             if (pt != null) {
                 Texto(Titulo.semParenteses(pt.port.titulo), Tipo.botao.copy(color = Cor.claro))
+                if (fontes > 1) Texto("$fontes fontes", Tipo.dica.copy(fontSize = 12.5.sp))
                 if (pt.estado != Estado.PRONTO) LinhaEstado(pt, longo = false)
             }
             Box(Modifier.weight(1f))
@@ -190,7 +207,7 @@ fun Ports(
 
         // painel de consoles, por cima de tudo; "Todos" é nulo
         if (painelAberto) PainelConsoles(
-            itens = listOf<Pair<String?, Int>>(null to todos.size) + Consoles.agrupar(todos),
+            itens = listOf<Pair<String?, Int>>(null to jogos.size) + Consoles.agrupar(jogos.map { it.principal }),
             atual = consoleAtivo,
             aoEscolher = { escolhido -> aoConsole(escolhido); fecharPainel() },
             aoFechar = { fecharPainel() },

@@ -105,6 +105,8 @@ class CatalogoOnline(private val contexto: Context) {
             canal = o.optTexto("channel") ?: "latest",
             estrelas = o.optJSONObject("stats")?.takeIf { !it.isNull("stars") }?.optInt("stars"),
             aiFlag = o.optBoolean("aiFlag", false),
+            testado = o.optBoolean("tested", false) || o.optString("source") == "curated",
+            atualizadoEm = o.optJSONObject("stats")?.optTexto("pushedAt"),
         )
     }
 

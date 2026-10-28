@@ -86,6 +86,21 @@
 
 **O que não deu:** clipe em vídeo. Não há fonte aberta de vídeo, e nenhum README verificado tinha vídeo ou GIF. Se um GIF aparecer, ele entra como imagem.
 
+## D-010 — Um jogo por capa, com a fonte escolhida no Instalar
+
+**Status:** aceita (escolha do Victor no mockup `laboratorio/_mockups/04-fontes.html`: B + 2) · **Data:** 2026-10-27 · issue #8
+
+**Decisão:**
+- A lista mostra cada **jogo** uma vez. Ports com o mesmo título (sem parênteses, acento e pontuação) viram as **fontes** desse jogo, mesmo vindo de consoles diferentes (Xbox 360 e PC).
+- **Capa (B):** com mais de uma fonte, a capa mostra "N fontes" embaixo à esquerda. A capa e o estado são os da fonte instalada; sem nenhuma instalada, os da sugerida.
+- **Instalar (2):** com várias fontes, abre uma janela no meio, como o "Baixar" do Hydra: nome, dono, versão, data, estrelas e tamanho de cada uma, com as etiquetas Sugerida, Instalada e Feito com IA. Com uma fonte só, instala direto.
+- **Sugerida:** testada ou curada primeiro, depois a com mais estrelas, depois a mais recente.
+- **Instalado:** "Jogar" abre a fonte instalada; "Trocar fonte" abre a mesma janela. Ficou "Trocar fonte" e não "Opções ☰", porque o menu de Opções ainda não existe (#7).
+
+**Por quê:** o mesmo jogo aparecia várias vezes (Perfect Dark 3×, Mario Kart Wii 2×), e o Victor pediu que fosse igual ao Hydra.
+
+**Limite:** o agrupamento depende do título do catálogo. Entradas com o nome do repositório no lugar do título (ex.: "ZeldaWWHDRecompAndroid") não se juntam ao jogo.
+
 ## Decisões da IA que o Victor precisa conferir
 
 - **Q-a:** "Ports" substitui Catálogo e Biblioteca, com filtros Instalados, Disponíveis e Atualizações.

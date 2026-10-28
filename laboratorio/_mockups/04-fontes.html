@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista por jogo e escolha de fonte (mockup · issue #8)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Tokens do Hydra (os mesmos do lab e do app) */
+  :root { --fundo:#121212; --escuro:#0d0d0d; --elevado:#1a1a1a; --claro:#f0f1f7; --texto:#d0d1d7; --texto-2:#a4a5ad;
+          --borda:rgba(255,255,255,.08); --borda-forte:rgba(255,255,255,.22); --teal:#16b195; --teal-claro:#7fd8c6; --ok:#5fe39a; --aviso:#ffc107; --raio:8px; }
+  * { box-sizing:border-box }
+  body { margin:0; background:#070707; color:var(--texto); font:14px "Noto Sans",sans-serif; }
+  main { padding:24px 20px 48px; display:flex; flex-direction:column; align-items:center; gap:16px }
+  h1 { margin:0; font-size:20px; color:var(--claro) }
+  .sub { margin:0; color:var(--texto-2); max-width:960px; line-height:1.5; text-align:center }
+  .opcoes { display:flex; flex-wrap:wrap; gap:14px 18px; justify-content:center; max-width:1100px }
+  .grupo { display:flex; gap:6px; align-items:center; flex-wrap:wrap }
+  .grupo > span { color:var(--texto-2); font-size:12.5px; margin-right:4px }
+  .grupo button { font:600 12.5px "Noto Sans",sans-serif; color:var(--texto); background:none; border:1px solid var(--borda-forte); border-radius:var(--raio); padding:7px 12px; cursor:pointer }
+  .grupo button[aria-pressed="true"] { background:var(--claro); color:#121212; border-color:var(--claro) }
+  .nota { color:var(--texto-2); font-size:12.5px; max-width:960px; line-height:1.55 }
+  .nota b { color:var(--texto) }
+
+  /* aparelho: Odin 2 deitado */
+  .tela { position:relative; width:960px; height:540px; border-radius:26px; outline:8px solid #1d1d1d; overflow:hidden; background:var(--fundo) }
+  .tela > section { display:none; position:absolute; inset:0 }
+  .tela[data-tela="ports"] .t-ports, .tela[data-tela="mkw"] .t-mkw, .tela[data-tela="pd"] .t-pd { display:block }
+
+  .g { display:inline-grid; place-items:center; flex:none; width:20px; height:20px; border-radius:50%; font:700 11px "Noto Sans",sans-serif; background:#2d2d2d; color:var(--claro) }
+  .g.claro { background:#121212; color:var(--claro) }
+  .g.ombro { width:auto; padding:0 6px; height:18px; border-radius:5px; background:#3a3a3a; font-size:11px }
+  .topo { position:absolute; top:0; left:0; right:0; height:44px; display:flex; align-items:center; gap:18px; padding:0 26px; z-index:5 }
+  .topo .s { font-size:14px; font-weight:500; color:var(--texto-2); padding:6px 0 5px; border-bottom:2px solid transparent }
+  .topo .s.atual { color:var(--claro); border-color:var(--claro) }
+  .dicas { position:absolute; right:26px; bottom:12px; display:flex; gap:16px; font-size:12.5px; color:var(--texto-2); z-index:6 }
+  .dicas span { display:inline-flex; gap:6px; align-items:center }
+
+  /* ---------- Ports: grade por jogo ---------- */
+  .chips { position:absolute; top:48px; left:26px; right:26px; display:flex; gap:8px; align-items:center }
+  .chip { height:32px; padding:0 12px; border-radius:var(--raio); border:1px solid var(--borda); font-size:13px; display:inline-flex; gap:6px; align-items:center; color:var(--texto) }
+  .chip .n { color:var(--texto-2); font-size:12px }
+  .chip.sel { background:var(--claro); color:#121212; border-color:var(--claro); font-weight:600 }
+  .chip.sel .n { color:#4a4b52 }
+  .chip.direita { margin-left:auto }
+  .grade { position:absolute; top:96px; left:26px; right:26px; display:grid; grid-template-columns:repeat(7, 1fr); gap:16px 14px }
+  .capa { position:relative; isolation:isolate; aspect-ratio:3/4; border-radius:6px; overflow:visible; cursor:pointer }
+  .capa .img { position:absolute; inset:0; border-radius:6px; background:#1b1b1b center/cover no-repeat; box-shadow:0 0 10px #000; overflow:hidden; display:grid; place-items:center;
+               color:var(--texto-2); font-weight:700; font-size:13px; text-align:center; padding:8px }
+  .capa.focado .img { outline:3px solid var(--claro); outline-offset:3px }
+  .selo { position:absolute; right:6px; bottom:6px; z-index:3; min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:rgba(0,0,0,.78);
+          display:inline-flex; align-items:center; justify-content:center; gap:4px; font-size:11px; font-weight:700; color:var(--texto) }
+  .selo.ok { color:var(--ok) }
+  /* marca de várias fontes: A empilhada · B número · C nada */
+  .pilha { display:none }
+  [data-marca="pilha"] .capa[data-fontes] .pilha { display:block; position:absolute; inset:0; border-radius:6px; background:#4a4b52; border:1px solid rgba(255,255,255,.35);
+                                                  transform:translate(6px,-6px); z-index:-1 }
+  [data-marca="pilha"] .capa[data-fontes="3"] .pilha.p2 { display:block; transform:translate(12px,-12px); background:#2f3036; z-index:-2 }
+  .num { display:none }
+  [data-marca="numero"] .capa[data-fontes] .num { display:inline-flex; position:absolute; left:6px; bottom:6px; z-index:3; height:20px; padding:0 7px; border-radius:10px;
+                                                  background:rgba(0,0,0,.78); font-size:11px; font-weight:700; color:var(--claro); align-items:center; gap:4px }
+  .faixa { position:absolute; left:0; right:0; bottom:0; height:52px; background:var(--escuro); border-top:1px solid var(--borda); display:flex; align-items:center; gap:18px; padding:0 26px }
+  .faixa b { color:var(--claro) }
+  .faixa .meta { color:var(--texto-2); font-size:12.5px }
+
+  /* ---------- Detalhes do jogo (D-009: galeria em cima do nome) ---------- */
+  .fundo { position:absolute; inset:0; background:center/cover no-repeat; filter:saturate(1.1); animation:kb 9s ease-in-out infinite alternate }
+  @keyframes kb { from { transform:scale(1.04) } to { transform:scale(1.12) translate(-1.5%,-1%) } }
+  .veu { position:absolute; inset:0; background:linear-gradient(90deg, rgba(18,18,18,.95) 30%, rgba(18,18,18,.6) 55%, rgba(18,18,18,.25)), linear-gradient(0deg, rgba(18,18,18,.92) 4%, transparent 40%) }
+  .esq { position:absolute; left:40px; top:28px; width:400px; z-index:2 }
+  .visor { width:400px; height:225px; border-radius:var(--raio); background:#0b0b0b center/contain no-repeat; border:1px solid var(--borda); box-shadow:0 0 18px #000; image-rendering:pixelated }
+  .minis { display:flex; gap:10px; margin-top:10px }
+  .minis i { width:56px; height:38px; border-radius:5px; background:#1b1b1b center/cover no-repeat; box-shadow:0 0 8px #000 }
+  .titulo { margin:12px 0 0; font-size:28px; font-weight:700; color:#fff; line-height:1.05 }
+  .meta-j { margin-top:4px; font-size:13px; color:#e6e7ec }
+  .estado { margin-top:8px; display:flex; gap:8px; align-items:center; font-weight:600; font-size:13.5px }
+  .estado i { font-style:normal; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; background:rgba(0,0,0,.55); font-size:11px }
+  .estado.ok { color:var(--ok) }
+  .botoes { margin-top:10px; display:flex; gap:8px }
+  .btn { height:42px; border-radius:var(--raio); padding:0 16px; display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:14px; cursor:pointer; border:1px solid transparent }
+  .btn.primario { background:var(--claro); color:#121212 }
+  .btn.primario.focado { outline:3px solid var(--claro); outline-offset:3px }
+  .btn.contorno { border-color:var(--borda-forte); color:var(--claro); background:rgba(0,0,0,.35) }
+  .btn.primario .g { background:#121212; color:var(--claro) }
+
+  .dir { position:absolute; right:40px; top:28px; bottom:44px; width:420px; z-index:2; display:flex; flex-direction:column; gap:10px; overflow:auto; scrollbar-width:none }
+  .bloco { padding:12px 14px; border-radius:var(--raio); background:rgba(13,13,13,.78); border:1px solid var(--borda); line-height:1.5 }
+  .bloco p { margin:0; font-size:13.5px }
+  .rotulo { font-size:11.5px; letter-spacing:.8px; text-transform:uppercase; color:var(--texto-2); margin-bottom:6px; display:flex; justify-content:space-between }
+  .rotulo .g { width:auto; padding:0 6px; border-radius:5px; height:18px }
+  dl { margin:0; display:grid; grid-template-columns:92px 1fr; gap:5px 10px; font-size:13px }
+  dt { color:var(--texto-2) } dd { margin:0; color:var(--claro) }
+  .item { display:flex; gap:10px; align-items:center; padding:3px 0; font-weight:600; color:var(--claro); font-size:13.5px }
+  .item i { font-style:normal; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.06); font-size:11px; color:var(--ok) }
+  .item i.n { color:var(--texto) }
+
+  /* ---------- as fontes ---------- */
+  .fonte { display:grid; grid-template-columns:1fr auto; gap:2px 12px; padding:10px 12px; border-radius:var(--raio); border:1px solid transparent; cursor:pointer }
+  .fonte + .fonte { margin-top:4px }
+  .fonte b { color:var(--claro); font-size:14px; font-weight:600; display:flex; gap:8px; align-items:center }
+  .fonte .linha { grid-column:1 / -1; font-size:12.5px; color:var(--texto-2); display:flex; gap:10px; flex-wrap:wrap }
+  .fonte .tag { font-size:11px; font-weight:700; padding:1px 7px; border-radius:10px }
+  .tag.sug { background:rgba(22,177,149,.18); color:var(--teal-claro) }
+  .tag.ia { background:rgba(255,255,255,.08); color:var(--texto) }
+  .tag.inst { background:rgba(95,227,154,.15); color:var(--ok) }
+  .fonte .tam { color:var(--texto); font-size:13px; font-weight:600; align-self:center }
+  .fonte.focado { background:rgba(255,255,255,.07); border-color:var(--borda-forte); box-shadow:inset 3px 0 0 var(--claro) }
+
+  /* escolha 1 · painel lateral (como as Opções ☰) */
+  .escolha { display:none }
+  .escolha.aberta { display:block }
+  .fundo-escuro { position:absolute; inset:0; background:rgba(0,0,0,.6); z-index:20 }
+  [data-escolha="lateral"] .painel { position:absolute; z-index:21; top:0; right:0; bottom:0; width:420px; background:#181818; border-left:1px solid var(--borda); padding:20px 16px 0; display:flex; flex-direction:column }
+  /* escolha 2 · janela no meio (como o "Baixar" do Hydra) */
+  [data-escolha="janela"] .painel { position:absolute; z-index:21; left:50%; top:50%; transform:translate(-50%,-50%); width:560px; background:#1a1a1a; border:1px solid var(--borda); border-radius:12px; padding:20px 16px 0; box-shadow:0 20px 60px rgba(0,0,0,.7) }
+  .painel h3 { margin:0 8px 2px; color:var(--claro); font-size:17px }
+  .painel .de { margin:0 8px 12px; font-size:12.5px; color:var(--texto-2) }
+  .painel .pe { margin-top:auto; padding:12px 8px; display:flex; gap:16px; font-size:12.5px; color:var(--texto-2); border-top:1px solid var(--borda) }
+  [data-escolha="janela"] .painel .pe { margin-top:10px }
+  .painel .pe span { display:inline-flex; gap:6px; align-items:center }
+  /* escolha 3 · direto na coluna da direita (sem janela) */
+  .fontes-dir { display:none }
+  [data-escolha="coluna"] .fontes-dir { display:block }
+  [data-escolha="coluna"] .ficha-pd { display:none }
+
+  .aviso { position:absolute; left:50%; bottom:64px; transform:translateX(-50%); z-index:30; background:#222; border:1px solid var(--borda-forte); color:var(--claro); padding:10px 16px; border-radius:var(--raio); font-size:13px; display:none }
+  .aviso.ver { display:block }
+  @media (prefers-reduced-motion: reduce) { .fundo { animation:none } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Lista por jogo e escolha da fonte</h1>
+  <p class="sub">Issue #8. A lista mostra cada <b>jogo</b> uma vez só, com os ports juntos dentro dele, e no "Instalar" você escolhe a fonte, como no "Baixar" do Hydra. Os dados são reais: <b>Mario Kart Wii</b> tem 2 fontes (a driftdroid é a que está instalada no seu Odin) e <b>Perfect Dark</b> tem 3, nenhuma instalada. ↑ ↓ andam nas fontes, Enter escolhe e Esc fecha.</p>
+
+  <div class="opcoes">
+    <div class="grupo" data-op="tela"><span>Tela</span>
+      <button data-v="ports" aria-pressed="true">1 · Ports (por jogo)</button>
+      <button data-v="pd">2 · Perfect Dark (3 fontes)</button>
+      <button data-v="mkw">3 · Mario Kart Wii (instalado)</button>
+    </div>
+    <div class="grupo" data-op="marca"><span>Capa com várias fontes</span>
+      <button data-v="pilha" aria-pressed="true">A · Capas empilhadas</button>
+      <button data-v="numero">B · Número na capa</button>
+      <button data-v="nada">C · Sem marca</button>
+    </div>
+    <div class="grupo" data-op="escolha"><span>Escolher a fonte</span>
+      <button data-v="lateral" aria-pressed="true">1 · Painel lateral</button>
+      <button data-v="janela">2 · Janela no meio (Hydra)</button>
+      <button data-v="coluna">3 · Direto na coluna da direita</button>
+    </div>
+  </div>
+
+  <div class="tela" id="tela" data-tela="ports" data-marca="pilha" data-escolha="lateral">
+
+    <!-- ===================== 1 · PORTS ===================== -->
+    <section class="t-ports">
+      <header class="topo"><span class="g ombro">LB</span><span class="s">Início</span><span class="s atual">Ports</span><span class="s">Ajustes</span><span class="g ombro">RB</span></header>
+      <div class="chips">
+        <span class="chip sel">Todos <span class="n">184</span></span><span class="chip">Instalados <span class="n">2</span></span>
+        <span class="chip">Disponíveis <span class="n">182</span></span><span class="chip">Atualizações <span class="n">0</span></span>
+        <span class="chip direita">Console: Todos</span>
+      </div>
+      <div class="grade" data-grade></div>
+      <footer class="faixa" data-faixa></footer>
+      <div class="dicas" data-dicas-ports></div>
+    </section>
+
+    <!-- ===================== 2 · PERFECT DARK ===================== -->
+    <section class="t-pd">
+      <div class="fundo" data-fundo-pd></div><div class="veu"></div>
+      <div class="esq">
+        <div class="visor" data-visor-pd></div>
+        <div class="minis" data-minis-pd></div>
+        <h2 class="titulo">Perfect Dark</h2>
+        <div class="meta-j">Nintendo 64 · 3 fontes</div>
+        <div class="estado"><i>+</i>Ainda não instalado</div>
+        <div class="botoes"><span class="btn primario focado" data-abrir-escolha><span class="g">A</span>Instalar</span></div>
+      </div>
+      <aside class="dir">
+        <div class="bloco"><div class="rotulo">Sobre</div><p>Port nativo de Perfect Dark com mira por controle ou toque, alta resolução e 60 fps.</p></div>
+        <div class="bloco ficha-pd"><div class="rotulo">Fontes</div><dl data-fontes-resumo></dl></div>
+        <div class="bloco fontes-dir"><div class="rotulo">Escolha a fonte <span class="g">→</span></div><div data-lista-coluna></div></div>
+      </aside>
+      <div class="dicas"><span><span class="g">A</span>Instalar</span><span><span class="g">B</span>Voltar</span></div>
+
+      <div class="escolha" data-escolha-pd>
+        <div class="fundo-escuro" data-fechar></div>
+        <div class="painel">
+          <h3>Instalar Perfect Dark</h3>
+          <div class="de">Escolha de onde baixar. A sugerida vem marcada.</div>
+          <div data-lista-painel></div>
+          <div class="pe"><span><span class="g">A</span>Instalar</span><span><span class="g">B</span>Fechar</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 3 · MARIO KART WII (instalado) ===================== -->
+    <section class="t-mkw">
+      <div class="fundo" data-fundo-mkw></div><div class="veu"></div>
+      <div class="esq">
+        <div class="visor" data-visor-mkw></div>
+        <div class="minis" data-minis-mkw></div>
+        <h2 class="titulo">Mario Kart Wii</h2>
+        <div class="meta-j">Wii · driftdroid</div>
+        <div class="botoes"><span class="btn primario focado"><span class="g">A</span>Jogar</span><span class="btn contorno"><span class="g claro" style="background:var(--claro);color:#121212">☰</span>Opções</span></div>
+      </div>
+      <aside class="dir">
+        <div class="bloco"><div class="rotulo">O que o port precisa</div>
+          <div class="item"><i>✓</i>Instalado · driftdroid 1.3.0</div><div class="item"><i>✓</i>Na versão mais nova</div><div class="item"><i>✓</i>Roda neste aparelho</div></div>
+        <div class="bloco"><div class="rotulo">Sobre</div><p>A native Android port of Mario Kart Wii and Retro Rewind. Fast, easy.</p></div>
+        <div class="bloco"><div class="rotulo">Ficha · fonte instalada</div>
+          <dl><dt>Port</dt><dd>driftdroid</dd><dt>Versão</dt><dd>1.3.0 · 09/10</dd><dt>Tamanho</dt><dd>192 MB</dd><dt>Projeto</dt><dd>dorPXP/driftdroid ↗</dd><dt>Outra fonte</dt><dd>kartpad 0.8.6 · nas Opções ☰</dd></dl></div>
+      </aside>
+      <div class="dicas"><span><span class="g">A</span>Jogar</span><span><span class="g">☰</span>Opções</span><span><span class="g">B</span>Voltar</span></div>
+    </section>
+
+    <div class="aviso" data-aviso></div>
+  </div>
+
+  <p class="nota"><b>Regras que o desenho segue:</b> jogo com uma fonte só instala direto, sem abrir a escolha (D-007). A sugerida é escolhida assim: curada ou testada primeiro, depois a que tem mais estrelas, depois a mais recente. "Feito com IA" aparece só como etiqueta. Trocar de fonte fica nas Opções (☰) do jogo (#7). O estado da capa é o da fonte instalada.</p>
+</main>
+
+<script>
+const L = "https://thumbnails.libretro.com/";
+const lib = (s, t, n) => L + encodeURIComponent(s) + "/" + t + "/" + encodeURIComponent(n) + ".png";
+const N64 = "Nintendo - Nintendo 64", WII = "Nintendo - Wii", GC = "Nintendo - GameCube";
+
+/* Ports: 14 jogos. fontes > 1 recebe a marca; estado "ok" = instalado */
+const JOGOS = [
+  { t: "Animal Crossing", img: lib(GC, "Named_Boxarts", "Animal Crossing (USA)") },
+  { t: "Banjo-Kazooie", img: lib(N64, "Named_Boxarts", "Banjo-Kazooie (USA)") },
+  { t: "Burnout 3: Takedown" },
+  { t: "Diddy Kong Racing", img: lib(N64, "Named_Boxarts", "Diddy Kong Racing (Europe) (En,Fr,De)"), fontes: 2 },
+  { t: "Final Fantasy Tactics Advance", fontes: 2 },
+  { t: "Mario Kart Wii", img: lib(WII, "Named_Boxarts", "Mario Kart Wii (USA) (En,Fr,Es)"), fontes: 2, ok: true, tela: "mkw" },
+  { t: "Marathon", fontes: 2 },
+  { t: "Need for Speed: Carbon", img: lib(GC, "Named_Boxarts", "Need for Speed - Carbon (USA)"), fontes: 3 },
+  { t: "Need for Speed: Most Wanted", img: lib(GC, "Named_Boxarts", "Need for Speed - Most Wanted (USA)"), fontes: 3 },
+  { t: "Perfect Dark", img: lib(N64, "Named_Boxarts", "Perfect Dark (USA)"), fontes: 3, tela: "pd" },
+  { t: "Pokemon Gold / Silver / Crystal", img: lib("Nintendo - Game Boy Color", "Named_Boxarts", "Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible)"), ok: true },
+  { t: "Star Fox 64", img: lib(N64, "Named_Boxarts", "Star Fox 64 (USA) (Rev 1)") },
+  { t: "Super Mario Galaxy", img: lib(WII, "Named_Boxarts", "Super Mario Galaxy (USA) (En,Fr,Es)") },
+  { t: "The Legend of Zelda: Majora's Mask", img: lib(N64, "Named_Boxarts", "Legend of Zelda, The - Majora's Mask (USA)") },
+];
+
+const FONTES_PD = [
+  { nome: "perfect_dark", autor: "izzy2lost", versao: "2.0.0", data: "27/08", tam: "14 MB", estrelas: 106, sug: true },
+  { nome: "perfect-dark-android", autor: "Mr4xd3mn", versao: "v1.3", data: "26/10", tam: "35 MB", estrelas: 4 },
+  { nome: "perfect_dark (touch)", autor: "mgrz18", versao: "touch-v0.1.0", data: "23/04", tam: "19 MB", estrelas: 3 },
+];
+
+const tela = document.getElementById("tela");
+let focoGrade = 9, focoFonte = 0;
+
+function desenharGrade() {
+  tela.querySelector("[data-grade]").innerHTML = JOGOS.map((j, i) => `
+    <div class="capa${i === focoGrade ? " focado" : ""}" data-i="${i}" ${j.fontes ? `data-fontes="${j.fontes}"` : ""}>
+      <span class="pilha"></span><span class="pilha p2"></span>
+      <div class="img" ${j.img ? `style="background-image:url('${j.img}')"` : ""}>${j.img ? "" : j.t.toUpperCase()}</div>
+      ${j.fontes ? `<span class="num">${j.fontes} fontes</span>` : ""}
+      <span class="selo ${j.ok ? "ok" : ""}">${j.ok ? "✓" : "+"}</span>
+    </div>`).join("");
+  tela.querySelectorAll(".capa").forEach((c) => {
+    c.onclick = () => { focoGrade = +c.dataset.i; desenharGrade(); const j = JOGOS[focoGrade]; if (j.tela) irTela(j.tela); };
+    const img = c.querySelector(".img");
+    const u = JOGOS[+c.dataset.i].img;
+    if (u) { const t = new Image(); t.onerror = () => { img.style.backgroundImage = ""; img.textContent = JOGOS[+c.dataset.i].t.toUpperCase(); }; t.src = u; }
+  });
+  const j = JOGOS[focoGrade];
+  tela.querySelector("[data-faixa]").innerHTML = `<b>${j.t}</b>${j.fontes ? `<span class="meta">${j.fontes} fontes</span>` : ""}<span class="meta">${j.ok ? "✓ Pronto" : "+ Não instalado"}</span>`;
+  tela.querySelector("[data-dicas-ports]").innerHTML = j.ok
+    ? `<span><span class="g">A</span>Jogar</span><span><span class="g">Y</span>Detalhes</span>`
+    : `<span><span class="g">A</span>Detalhes</span>`;
+}
+
+function linhaFonte(f, i, ondeFoco) {
+  return `<div class="fonte${i === focoFonte && ondeFoco ? " focado" : ""}" data-f="${i}">
+    <b>${f.nome}${f.sug ? '<span class="tag sug">Sugerida</span>' : ""}${f.ia ? '<span class="tag ia">Feito com IA</span>' : ""}</b>
+    <span class="tam">${f.tam}</span>
+    <span class="linha"><span>${f.autor}</span><span>${f.versao}</span><span>atualizado ${f.data}</span><span>★ ${f.estrelas}</span></span>
+  </div>`;
+}
+function desenharFontes() {
+  const aberta = tela.querySelector("[data-escolha-pd]").classList.contains("aberta");
+  tela.querySelector("[data-lista-painel]").innerHTML = FONTES_PD.map((f, i) => linhaFonte(f, i, aberta)).join("");
+  tela.querySelector("[data-lista-coluna]").innerHTML = FONTES_PD.map((f, i) => linhaFonte(f, i, tela.dataset.escolha === "coluna")).join("");
+  tela.querySelector("[data-fontes-resumo]").innerHTML = FONTES_PD.map((f) => `<dt>${f.nome.split(" ")[0]}</dt><dd>${f.versao} · ${f.tam} · ★ ${f.estrelas}${f.sug ? " · sugerida" : ""}</dd>`).join("");
+  tela.querySelectorAll("[data-f]").forEach((el) => (el.onclick = () => { focoFonte = +el.dataset.f; instalar(); }));
+}
+
+function abrirEscolha() {
+  if (tela.dataset.escolha === "coluna") { focoFonte = 0; desenharFontes(); return; }
+  focoFonte = 0; tela.querySelector("[data-escolha-pd]").classList.add("aberta"); desenharFontes();
+}
+function fecharEscolha() { tela.querySelector("[data-escolha-pd]").classList.remove("aberta"); desenharFontes(); }
+function instalar() {
+  const f = FONTES_PD[focoFonte];
+  fecharEscolha();
+  const a = tela.querySelector("[data-aviso]");
+  a.textContent = `Instalando ${f.nome} (${f.autor}) · ${f.tam}… o progresso aparece na capa do jogo`;
+  a.classList.add("ver"); setTimeout(() => a.classList.remove("ver"), 2600);
+}
+
+function galeria(sel, imgs) {
+  tela.querySelector(`[data-visor-${sel}]`).style.backgroundImage = `url('${imgs[0]}')`;
+  tela.querySelector(`[data-fundo-${sel}]`).style.backgroundImage = `url('${imgs[0]}')`;
+  tela.querySelector(`[data-minis-${sel}]`).innerHTML = imgs.map((u) => `<i style="background-image:url('${u}')"></i>`).join("");
+}
+galeria("pd", [lib(N64, "Named_Snaps", "Perfect Dark (USA)"), lib(N64, "Named_Titles", "Perfect Dark (USA)"), lib(N64, "Named_Snaps", "Perfect Dark (USA) (Rev 1)")]);
+galeria("mkw", [lib(WII, "Named_Snaps", "Mario Kart Wii (USA) (En,Fr,Es)"), lib(WII, "Named_Snaps", "Mario Kart Wii (Europe)"), lib(WII, "Named_Snaps", "Mario Kart Wii (Japan)"), lib(WII, "Named_Titles", "Mario Kart Wii (USA) (En,Fr,Es)")]);
+
+function irTela(v) {
+  tela.dataset.tela = v;
+  document.querySelectorAll('[data-op="tela"] button').forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === v));
+  fecharEscolha();
+}
+tela.querySelector("[data-abrir-escolha]").onclick = abrirEscolha;
+tela.querySelector("[data-fechar]").onclick = fecharEscolha;
+
+addEventListener("keydown", (e) => {
+  const aberta = tela.querySelector("[data-escolha-pd]").classList.contains("aberta") || (tela.dataset.tela === "pd" && tela.dataset.escolha === "coluna");
+  if (tela.dataset.tela === "ports" && ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(e.key)) {
+    const d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 7, ArrowUp: -7 }[e.key];
+    focoGrade = Math.max(0, Math.min(JOGOS.length - 1, focoGrade + d)); desenharGrade(); e.preventDefault(); return;
+  }
+  if (tela.dataset.tela === "ports" && e.key === "Enter") { const j = JOGOS[focoGrade]; if (j.tela) irTela(j.tela); return; }
+  if (tela.dataset.tela === "pd") {
+    if (e.key === "Enter" && !tela.querySelector("[data-escolha-pd]").classList.contains("aberta")) {
+      if (tela.dataset.escolha === "coluna") return instalar();
+      return abrirEscolha();
+    }
+    if (aberta && (e.key === "ArrowDown" || e.key === "ArrowUp")) { focoFonte = (focoFonte + (e.key === "ArrowDown" ? 1 : 2)) % 3; desenharFontes(); e.preventDefault(); return; }
+    if (e.key === "Enter") return instalar();
+  }
+  if (e.key === "Escape") { if (tela.querySelector("[data-escolha-pd]").classList.contains("aberta")) fecharEscolha(); else irTela("ports"); }
+});
+
+document.querySelectorAll(".grupo").forEach((g) => g.querySelectorAll("button").forEach((b) => b.onclick = () => {
+  const op = g.dataset.op, v = b.dataset.v;
+  if (op === "tela") return irTela(v);
+  g.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  tela.dataset[op] = v; fecharEscolha();
+}));
+
+desenharGrade(); desenharFontes();
+</script>
+</body>
+</html>

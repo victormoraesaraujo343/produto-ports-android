@@ -35,6 +35,10 @@ data class Port(
     val estrelas: Int? = null,
     /** Feito com IA (`aiFlag` do catálogo, marcado pelo awesome-decomp-games). Ausente é falso. */
     val aiFlag: Boolean = false,
+    /** Testado no catálogo (`tested`) ou curado (`source == "curated"`). */
+    val testado: Boolean = false,
+    /** Data (ISO) da última atividade: `stats.pushedAt`, trocada pela da release quando ela é conhecida. */
+    val atualizadoEm: String? = null,
 )
 
 /** O que se lista na tela: o port e o estado já calculado. */

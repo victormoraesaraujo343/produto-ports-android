@@ -6,6 +6,8 @@
 
 **v0.2.0 publicada** (release no GitHub) e `TESTADO NO APARELHO` no Odin 2 em 2026-10-27. A lista online do `ports-catalogue` tem 194 ports com APK Android (eram 31), vindos da awesome-decomp-games (incluindo os feitos com IA, com etiqueta) e de buscas automáticas no GitHub: em inglês, português e espanhol, forks Android e outros ports do mesmo autor. Passou no gabarito do Naruto (`docs/validacao/GABARITO-NARUTO.md`). Detalhes com galeria de gameplay em cima do nome (D-009), filtro por console (incluindo PC e Outros), Ver os Detalhes antes de instalar (D-008).
 
+**Issue #8 feita** (D-010), `TESTADO NO APARELHO` no Odin em 2026-10-27: a lista mostra 180 jogos (191 ports), Perfect Dark com 3 fontes e Mario Kart Wii com 2, a janela de fontes no Instalar e o "Trocar fonte" no jogo instalado. Também corrigido: o ↓ do controle parava na terceira fileira da lista de Ports (a capa em foco subia 3 dp no layout e as vizinhas pareciam "embaixo" dela).
+
 ## O que existe
 
 - Os documentos do projeto (visão, decisões e arquitetura proposta).

@@ -16,6 +16,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -66,8 +68,14 @@ class Repositorio(contexto: Context) {
     private val baixando = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val ultimoEnvio = HashMap<String, Long>()
 
-    /** O que se descobre depois do catálogo: versão nova, tamanho, capas do SteamGridDB. */
-    private data class Extras(val versao: String? = null, val tamanho: String = "", val capa: String? = null, val heroi: String? = null)
+    /** O que se descobre depois do catálogo: versão nova, tamanho, data da release, capas do SteamGridDB. */
+    private data class Extras(
+        val versao: String? = null,
+        val tamanho: String = "",
+        val capa: String? = null,
+        val heroi: String? = null,
+        val publicado: String? = null,
+    )
 
     init {
         escopo.launch {
@@ -124,6 +132,17 @@ class Repositorio(contexto: Context) {
         }
     }
 
+    /** Busca versão e tamanho de cada fonte (pro seletor de fontes do jogo), em paralelo. */
+    suspend fun detalharFontes(ids: List<String>) {
+        withContext(Dispatchers.IO) {
+            coroutineScope {
+                ids.map { id ->
+                    async { synchronized(lock) { base.find { it.id == id } }?.let { buscarLancamento(it) } }
+                }.awaitAll()
+            }
+        }
+    }
+
     /** Os ports instalados ganham a versão mais nova (pra mostrar "Atualização"). */
     private suspend fun buscarVersoesDosInstalados() {
         val lista = synchronized(lock) { base.toList() }
@@ -132,12 +151,15 @@ class Repositorio(contexto: Context) {
         }
     }
 
+    /** Quando o port foi aberto ou instalado por último (ms desde 1970; 0 se nunca). */
+    fun usoDe(id: String): Long = uso.getLong(id, 0L)
+
     /** Ports que o jogador pode ver na lista de instalados, mais recente primeiro. */
     fun recentes(): List<PortNaTela> {
         val pronto = _estado.value as? EstadoCatalogo.Pronto ?: return emptyList()
         return pronto.ports
             .filter { it.versaoInstalada != null }
-            .sortedByDescending { uso.getLong(it.port.id, 0L) }
+            .sortedByDescending { usoDe(it.port.id) }
     }
 
     /** Busca a release (versão e tamanho) e as capas do port, e atualiza o estado. */
@@ -234,6 +256,7 @@ class Repositorio(contexto: Context) {
             extras[p.id] = if (rel == null) atual else atual.copy(
                 versao = Versoes.semV(rel.tag),
                 tamanho = Tamanhos.formatar(rel.tamanhoBytes),
+                publicado = rel.publicadoEm,
             )
         }
         republicar()
@@ -280,6 +303,7 @@ class Repositorio(contexto: Context) {
             tamanho = ex?.tamanho ?: p0.tamanho,
             capaUrl = p0.capaUrl ?: ex?.capa,
             heroUrl = p0.heroUrl ?: ex?.heroi,
+            atualizadoEm = ex?.publicado ?: p0.atualizadoEm,
         )
         val instalada = pacote?.let(pacotes::versaoInstalada)
         val fatos = Fatos(

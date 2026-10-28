@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import app.ports.core.Estado
+import app.ports.core.Jogos
 import app.ports.core.PortNaTela
 import app.ports.core.Textos
 import app.ports.core.Titulo
@@ -98,9 +99,13 @@ class MainActivity : ComponentActivity() {
                 // um único filtro: ports de VR saem de todas as listas, e os feitos com IA quando escondidos
                 fun naLista(pt: PortNaTela) = !Vr.ehVr(pt.port.titulo) && (mostrarIA || !pt.port.aiFlag)
                 val visiveis = remember(pronto, mostrarIA) { pronto?.ports.orEmpty().filter(::naLista) }
+                // um jogo por linha: as fontes do mesmo jogo viram um JogoNaTela
+                val jogos = remember(visiveis, voltas) { Jogos.agrupar(visiveis, repositorio::usoDe) }
                 val recentes = remember(visiveis, voltas) { repositorio.recentes().filter(::naLista) }
-                // sem recentes, a fileira mostra os mais estrelados
-                val fileira = if (recentes.isNotEmpty()) recentes else visiveis.sortedByDescending { it.port.estrelas ?: -1 }.take(8)
+                // sem recentes, a fileira mostra os mais estrelados; cada jogo aparece só uma vez
+                val fileira = if (recentes.isNotEmpty()) {
+                    recentes.mapNotNull { r -> jogos.find { j -> j.fontes.any { it.port.id == r.port.id } }?.principal }.distinctBy { it.port.id }
+                } else jogos.map { it.principal }.sortedByDescending { it.port.estrelas ?: -1 }.take(8)
 
                 fun irSecao(s: Secao) { pilha.clear(); pilha.add(Tela.DeSecao(s)); focadoId = null }
                 fun detalhes(id: String) { pilha.add(Tela.DeDetalhes(id)) }
@@ -127,7 +132,7 @@ class MainActivity : ComponentActivity() {
                             Secao.PORTS ->
                                 if (pronto == null) TelaSemLista(Secao.PORTS, estado, { irSecao(it) }, { atualizarLista() })
                                 else Ports(
-                                    visiveis, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { if (Textos.naoInstalado(it.estado)) detalhes(it.port.id) else acao(it) }, aoSecao = { irSecao(it) },
+                                    jogos, focadoId, aoFocar = { focadoId = it?.port?.id }, aoAcao = { if (Textos.naoInstalado(it.estado)) detalhes(it.port.id) else acao(it) }, aoSecao = { irSecao(it) },
                                     console = console, aoConsole = { console = it },
                                 )
                             Secao.AJUSTES -> Ajustes(
@@ -140,11 +145,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         is Tela.DeDetalhes -> {
-                            val p = visiveis.find { it.port.id == tela.id }
-                            if (p != null) Detalhes(
-                                p,
-                                aoAcao = { acao(p) },
-                                aoAtualizar = { instalar(p.port.id) },
+                            // o id é de uma fonte: a tela é do jogo que a contém
+                            val jogo = jogos.find { j -> j.fontes.any { it.port.id == tela.id } }
+                            if (jogo != null) Detalhes(
+                                jogo,
+                                aoAcao = { acao(it) },
+                                aoAtualizar = { instalar(it.port.id) },
+                                aoInstalar = { instalar(it.port.id) },
                                 aoVoltar = { onBackPressedDispatcher.onBackPressed() },
                             )
                             else TelaSemLista(null, estado, { irSecao(it) }, { atualizarLista() })
